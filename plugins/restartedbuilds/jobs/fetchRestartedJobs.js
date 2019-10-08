@@ -22,7 +22,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     if (body[0] == '{') {
                         console.log(Object.keys(body))
                     }
-                    body = stripAnsi(body)
+                    // body = stripAnsi(body)
                     logCollection.insertOne({
                         id: jobId,
                         diff: jsdiff.createPatch('log', oldLog.log, body),
