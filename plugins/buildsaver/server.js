@@ -30,13 +30,13 @@ client.connect(function(err) {
     console.log("Connected successfully to server", err);
     
     const db = client.db("buildsaver");
-    db.createCollection( "builds", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "jobs", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "commits", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "repositories", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "users", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "unknown_users", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    db.createCollection( "logs", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
+    db.createCollection( "builds")
+    db.createCollection( "jobs")
+    db.createCollection( "commits")
+    db.createCollection( "repositories")
+    db.createCollection( "users")
+    db.createCollection( "unknown_users")
+    db.createCollection( "logs")
     const buildsCollection = db.collection('builds')
     buildsCollection.createIndex('id', {unique: true})
     const jobsCollection = db.collection('jobs')

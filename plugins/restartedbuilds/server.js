@@ -24,9 +24,9 @@ const server = require('http').Server(app);
     const db = client.db("restartedbuilds");
 
     // create collection
-    const buildsCollection = await db.createCollection( "builds", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    const jobsCollection = await db.createCollection( "jobs", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
-    const logCollection = await db.createCollection( "logs", { storageEngine: {wiredTiger: { configString: "blockCompressor=zlib" }}})
+    const buildsCollection = await db.createCollection( "builds")
+    const jobsCollection = await db.createCollection( "jobs")
+    const logCollection = await db.createCollection( "logs")
 
     // create index
     await buildsCollection.createIndex('id', {unique: true})
