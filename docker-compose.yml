@@ -1,0 +1,58 @@
+version: '3'
+services:
+  front:
+    build: front
+    command: nodemon server.js
+    volumes:
+      - ./front:/app
+    ports:
+      - "5001:80"
+      - "5858:5858"
+    networks:
+      - front-tier
+      - back-tier
+  listener:
+    build: listener
+    command: nodemon server.js
+    volumes:
+      - ./listener:/app
+    networks:
+      - back-tier
+  github:
+    build: github
+    command: nodemon server.js
+    volumes:
+      - ./github:/app
+    networks:
+      - back-tier
+  logparser:
+    build: logparser
+    command: nodemon server.js
+    volumes:
+      - ./logparser:/app
+    networks:
+      - back-tier
+  buildsaver:
+    build: plugins/buildsaver
+    command: nodemon server.js
+    volumes:
+      - ./plugins/buildsaver:/app
+    networks:
+      - back-tier
+    links:
+      - mongo
+      - listener
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - db-data:/data/db
+    networks:
+      - back-tier
+volumes:
+  db-data:
+
+networks:
+  front-tier:
+  back-tier:

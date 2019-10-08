@@ -1,0 +1,154 @@
+<html ng-app="BikiniRepair" ng-controller="AppCtrl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Angular Material style sheet -->
+        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
+        <!-- CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <title>({{jobs.length}}) Travis Jobs</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body keypress-events>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="navbar-header">
+                <h2>Travis {{filteredJobs.length}} Jobs</h2>
+                <input type="search" placeholder="Search..." ng-model="search" autofocus>
+            </div>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul id="menu" class="nav navbar-nav side-nav">
+                    <li>
+                        <h3>Languages</h3>
+                    </li>
+                    <li>
+                        <ul class="nav">
+                            <li ng-repeat="(s, count) in languages">
+                                <label for="{{ s }}" ng-class="{'actived': filter[s]}"><input type="checkbox" id="{{ s }}" ng-model="filter[s]" ng-click="clickFilter(s)">{{s.title()}} ({{ count }})</label>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <h3>States</h3>
+                    </li>
+                    <li>
+                        <ul class="nav">
+                            <li ng-repeat="(s, count) in states">
+                                <label for="{{ s }}" ng-class="{'actived': filter[s]}"><input type="checkbox" id="{{ s }}" ng-model="filter[s]" ng-click="clickFilter(s)">{{s.title()}} ({{ count }})</label>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+            <table id="mainTable" class="table">
+                <colgroup>
+                    <col span="1">
+                    <col span="1">
+                    <col span="1">
+                    <col span="1">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>
+                        <a href="#" ng-click="sort('repository_slug')">
+                            Repository
+                            <span ng-show="sortType == 'repository_slug' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'repository_slug' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('id')">
+                            ID
+                            <span ng-show="sortType == 'id' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'id' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('state')">
+                            State
+                            <span ng-show="sortType == 'state' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'state' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('started_at')">
+                            Started at
+                            <span ng-show="sortType == 'started_at' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'started_at' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('finished_at')">
+                            Finished at
+                            <span ng-show="sortType == 'finished_at' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'finished_at' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('duration')">
+                            Duration
+                            <span ng-show="sortType == 'duration' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'duration' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="#" ng-click="sort('config.language')">
+                            Language
+                            <span ng-show="sortType == 'config.language' && sortReverse" class="fa fa-caret-down"></span>
+                            <span ng-show="sortType == 'config.language' && !sortReverse" class="fa fa-caret-up"></span>
+                        </a>
+                    </th>
+                    <th>Options</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="(i, job) in jobs| orderBy:sortType:sortReverse| filter:jobFilter as filteredJobs track by $index" class="job {{job.state}}">
+                    <td ng-click="openJob(job)">{{ job.repository_slug }}</td>
+                    <td class="columnUrl" ng-click="openJob(job)">{{ job.id }}</td>
+                    <td ng-click="openJob(job)">{{ job.state.title() }}</td>
+                    <td ng-click="openJob(job)">{{ job.started_at| date:'short' }}</td>
+                    <td ng-click="openJob(job)">{{ job.finished_at| date:'short' }}</td>
+                    <td ng-click="openJob(job)">{{ humanInterval(job.duration/1000) }}</td>
+                    <td ng-click="openJob(job)">{{ job.config.language.title() }}</td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- /#page-wrapper -->
+    </div><!-- /#wrapper -->
+    <span ng-controller="jobController"></span>
+
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="/js/angular.js"></script>
+    <script src="/js/realtime_dashboard.js"></script>
+    </body>
+    <script type="text/ng-template" id="modalJob.html">
+        <div class="modalheader">
+            <h3 class="modal-title url" id="modal-title">{{ $ctrl.job.repository_slug }} {{ $ctrl.job.build_id }}
+                {{ $ctrl.job.id }}</h3>
+            <a ng-click="$ctrl.previousJob()"><i class="fa fa-arrow-left" aria-hidden="true"></i> Previous Job</a> | <a ng-click="$ctrl.nextJob()">Next Job <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="modal-body">
+            <p>{{ $ctrl.job.commit.message }}</p>
+            <p>
+                Tool: {{ $ctrl.job.tool }}<br>
+                Tests: {{ $ctrl.job.tests.length }}<br>
+                Errors: {{ $ctrl.job.errors.length }}<br>
+            </p>
+            <textarea ng-bind="$ctrl.job.log" rows="15" style="width: 100%"></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="$ctrl.ok()">OK</button>
+        </div>
+    </script>
+</html>
