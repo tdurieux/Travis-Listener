@@ -1,3 +1,4 @@
+const proxy = require('express-http-proxy')
 const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
@@ -56,13 +57,23 @@ wssClient.on('message', function incoming(data) {
   wssServer.broadcast(data)
 });
 
-
-app.all("*", function (req, res) {
-    request('http://github/repositories/20633049', function (error, response, body) {
-        console.log('here', JSON.parse(body))
-        res.json((body));
-    });
-});
+function selectProxyHost (request) {
+    let url = request.url.substring(1, request.url.length);
+    const indexService = url.indexOf('/')
+    if (indexService > -1) {
+        url = url.substring(0, indexService)
+    }
+    return url;
+}
+app.use('/r/', proxy(selectProxyHost, {
+    proxyReqPathResolver: function (req) {
+        let url = req.url.substring(1, req.url.length);
+        const indexService = url.indexOf('/')
+        url = url.substring(indexService, url.length)
+        console.log(url)
+        return url;
+    },
+}));
 
 server.listen(port, function () {
     var port = server.address().port;

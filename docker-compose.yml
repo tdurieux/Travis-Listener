@@ -42,6 +42,15 @@ services:
     links:
       - mongo
       - listener
+  restartedbuilds:
+    build: plugins/restartedbuilds
+    command: nodemon server.js
+    volumes:
+      - ./plugins/restartedbuilds:/app
+    networks:
+      - back-tier
+    links:
+      - mongo
   mongo:
     image: mongo:latest
     ports:

@@ -1,0 +1,109 @@
+<html ng-app="BikiniRepair" ng-controller="AppCtrl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- Angular Material style sheet -->
+        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <title>Restarted builds</title>
+        <link rel="stylesheet" href="/r/restartedbuilds/css/style.css">
+    </head>
+    <body>
+        <!-- Main navigation -->
+        <header class="d-flex">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark fixed-top scrolling-navbar ">
+                <div class="container">
+                <a class="navbar-brand" href="#">Anonymous GitHub</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+                    <ul class="navbar-nav mr-auto smooth-scroll">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#usage" data-offset="90">Usage</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features" data-offset="90">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about" data-offset="90">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-icon" href="https://github.com/tdurieux/anonymous_github/" data-offset="30"><i class="fa fa-github" aria-hidden="true"></i></a>
+                    </li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- Navbar -->
+        </header>
+        <!-- Main navigation -->
+        <!--Main Layout-->
+        <main>
+            <div class="container-fluid">
+                <div class="row">
+                    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                        <div class="sidebar-sticky">
+                            <div class="nav flex-column">
+                                <div class="list-group" id="restarted_builds" role="tablist">
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <h3 class="mb-auto text-center"><span id='restarted_builds_nb'></span> Restarted Builds</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <h3 class="mb-auto text-center"><span id='restarted_jobs_nb'></span> Restarted Jobs</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="tab-content" id="restarted_builds_details">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+        <script src="/r/restartedbuilds/js/script.js"></script>
+
+        <script>
+            if ($(document).scrollTop() < 35) {
+                $('.navbar').removeClass('top-nav-collapse')
+            } else {
+                $('.navbar').addClass('top-nav-collapse')
+            }
+            $(document).scroll(e => {
+                if ($(document).scrollTop() < 35) {
+                    $('.navbar').removeClass('top-nav-collapse')
+                } else {
+                    $('.navbar').addClass('top-nav-collapse')
+                }
+            })
+            </script>
+    </body>
+</html>
