@@ -68,7 +68,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             delete job.config;
             
             
-            if (jobObj[job.id].started_at < job.started_at) {
+            if (jobObj[job.id].started_at < job.started_at && job.state != 'started') {
                 restartedJobs.push({
                     id: job.id,
                     wait_time: job.started_at - jobObj[job.id].started_at,
@@ -100,7 +100,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }, {
             '$match': {
                 'jobs': {
-                '$size': 0
+                '$eq': []
                 }
             }
             }

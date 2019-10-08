@@ -41,7 +41,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             delete build.commit;
             delete build.config;
             
-            if (buildObj[build.id].started_at < build.started_at) {
+            if (buildObj[build.id].started_at < build.started_at && build.state != 'started') {
                 restartedBuilds.push({
                     id: build.id,
                     wait_time: buildObj[build.id].started_at - build.started_at,
