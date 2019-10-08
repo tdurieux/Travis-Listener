@@ -11,6 +11,8 @@ services:
     networks:
       - front-tier
       - back-tier
+    links:
+      - listener
   listener:
     build: listener
     command: nodemon server.js
