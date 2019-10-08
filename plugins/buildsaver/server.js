@@ -102,7 +102,7 @@ client.connect(function(err) {
                         if (body[0] == '{') {
                             console.log(body)
                         }
-                        body = stripAnsi(body)
+                        // body = stripAnsi(body)
                         logCollection.insertOne({
                             id: jobId,
                             log: body
