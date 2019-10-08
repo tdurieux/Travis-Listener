@@ -83,7 +83,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     agenda.define('fetch restarted jobs', {concurrency: 1}, async job => {
 
         let skip = 0
-        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index != job.attrs.total) {
+        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index < job.attrs.total) {
             skip = job.attrs.data.index
         }
 

@@ -57,7 +57,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const maxRequest = 250
 
         let skip = 0
-        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index != job.attrs.total) {
+        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index < job.attrs.total) {
             skip = job.attrs.data.index + 1
         }
         let currentRequest = []
