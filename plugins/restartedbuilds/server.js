@@ -1,10 +1,6 @@
 const express = require('express')
-const WebSocket = require('ws');
 const MongoClient = require('mongodb').MongoClient;
-const request = require('request')
-const stripAnsi = require('strip-ansi');
 const Travis = require('travis-ci');
-const jsdiff = require('diff');
 const Agenda = require('agenda');
 
 var port = process.env.PORT || 4000;
