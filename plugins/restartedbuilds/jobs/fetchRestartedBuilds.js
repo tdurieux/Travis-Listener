@@ -44,7 +44,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             if (buildObj[build.id].started_at < build.started_at && build.state != 'started') {
                 restartedBuilds.push({
                     id: build.id,
-                    wait_time: buildObj[build.id].started_at - build.started_at,
+                    wait_time: build.started_at - buildObj[build.id].started_at,
                     old: buildObj[build.id],
                     new: build
                 });
