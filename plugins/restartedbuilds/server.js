@@ -46,7 +46,7 @@ const server = require('http').Server(app);
             res.json({status: 'ok', job: await agenda.now(TASK_NAME)});
         } else {
             const lastJob = lastJobs[0]
-            if (lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) {
+            if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
                 res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
@@ -61,7 +61,7 @@ const server = require('http').Server(app);
             res.json({status: 'ok', job: await agenda.now(TASK_NAME)});
         } else {
             const lastJob = lastJobs[0]
-            if (lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) {
+            if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
                 res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
@@ -79,7 +79,7 @@ const server = require('http').Server(app);
     });
 
     app.get("/api/builds", async function (req, res) {
-        const builds = await buildsCollection.find().toArray();
+        const builds = await buildsCollection.find({ $where : "this.old.state != this.new.state"}).toArray();
         res.json(builds);
     });
 
