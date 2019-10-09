@@ -25,7 +25,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     // body = stripAnsi(body)
                     logCollection.insertOne({
                         id: jobId,
-                        diff: jsdiff.createPatch('log', oldLog.log, body),
+                        //diff: jsdiff.createPatch('log', oldLog.log, body),
                         log: body
                     })
                 }
@@ -103,8 +103,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 '$eq': []
                 }
             }
-            }
-        ]).toArray();
+        }]).toArray();
 
         let count = 0
         for (let build of restartedBuilds) {
@@ -126,7 +125,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             // ignore
                         }
                         for (let job of newJobs) {
-                            await saveLog(job.id)
+                            saveLog(job.id)
                         }
                         currentJobsID = []
                         job.attrs.data = {index: count, total: restartedBuilds.length}
@@ -147,7 +146,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     // ignore
                 }
                 for (let job of newJobs) {
-                    await saveLog(job.id)
+                    saveLog(job.id)
                 }
             }
         }
