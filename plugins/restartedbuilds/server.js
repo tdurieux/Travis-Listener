@@ -1,6 +1,6 @@
 const express = require('express')
+const compression = require('compression')
 const MongoClient = require('mongodb').MongoClient;
-const Travis = require('travis-ci');
 const Agenda = require('agenda');
 
 var port = process.env.PORT || 4000;
@@ -8,13 +8,11 @@ const mongoURL = "mongodb://mongo:27017";
 
 const agenda = new Agenda({db: {address: mongoURL + '/agenda'}});
 
-const travis = new Travis({
-    version: '2.0.0'
-});
-
 const client = new MongoClient(mongoURL, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const app = express();
+app.use(compression())
+
 const server = require('http').Server(app);
 
 (async _ => {

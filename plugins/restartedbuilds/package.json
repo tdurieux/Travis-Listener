@@ -11,6 +11,7 @@
   "dependencies": {
     "agenda": "^2.1.0",
     "async": "^3.1.0",
+    "compression": "^1.7.4",
     "diff": "^4.0.1",
     "express": "^4.17.1",
     "method-override": "^3.0.0",
