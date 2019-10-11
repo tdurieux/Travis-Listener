@@ -63,11 +63,14 @@ services:
     networks:
       - back-tier
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet 1
+      test:
+      - CMD
+      - mongo
+      - --eval
+      - "db.adminCommand('ping')"
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 40s
     cpuset: "0"
 volumes:
   db-data:
