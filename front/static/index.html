@@ -42,17 +42,55 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h1>Dashboard</h1>
+                        <h2 class="mb-auto">Dashboard</h2>
                     </div>
-                    <div class="col-md-4">
-                        <div class="chart">
-                            <div id="stateChart_y_axis"></div>
-                            <div id="stateChart"></div>
-                            <div id="stateChart_x_axis"></div>
+                    <div class="col-md-12">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <h3 class="mb-auto">Activity</h3>
+                                <div id="travisChart" ></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div id="travisChart" ></div>
+                    <div class="col-md-4">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <h3 class="mb-auto">State</h3>
+                                <div class="chart">
+                                    <div id="stateChart"></div>
+                                    <div id="stateChart_x_axis"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <h3 class="mb-auto">CPU</h3>
+                                <div class="chart">
+                                    <div id="cpuChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <h3 class="mb-auto">Memory</h3>
+                                <div class="chart">
+                                    <div id="memoryChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <h2 class="mb-auto">Services</h2>
+                    </div>
+                    <div class="col-md-3">
+                        Restarted Builds
+                    </div>
+                    <div class="col-md-3">
+                        Build Saver
                     </div>
                 </div>
             </div>

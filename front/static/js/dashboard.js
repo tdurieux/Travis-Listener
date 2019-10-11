@@ -12,6 +12,35 @@ const ws = new WebSocket(protocol + '://' + wsUrl)
 var tv = 1000;
 var maxPoints = 30
 var previousTime = null;
+
+var cpu = new Rickshaw.Graph( {
+	element: document.getElementById("cpuChart"),
+	height: 200,
+    renderer: 'line',
+    gapSize: 0,
+	stroke: true,
+	preserve: true,
+	series: new Rickshaw.Series.FixedDuration([{ name: 'memory' }], undefined, {
+		timeInterval: 250,
+		maxDataPoints: 30
+    }),
+    'min': 0,
+    'max': 1
+});
+var memory = new Rickshaw.Graph( {
+	element: document.getElementById("memoryChart"),
+	height: 200,
+    renderer: 'line',
+    gapSize: 0,
+	stroke: true,
+	preserve: true,
+	series: new Rickshaw.Series.FixedDuration([{ name: 'system' }], undefined, {
+		timeInterval: 250,
+		maxDataPoints: 30
+    }),
+    'min': 0
+});
+
 var graph = new Rickshaw.Graph( {
 	element: document.getElementById("travisChart"),
 	height: 200,
@@ -39,21 +68,19 @@ var state = new Rickshaw.Graph( {
             data: []
         }
 	]
-} );
-var y_ticks = new Rickshaw.Graph.Axis.Y( {
-	graph: state,
-	orientation: 'left',
-	tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-	element: document.getElementById('stateChart_y_axis')
-} );
+});
 
 var resize = function() {
 	state.configure({
-		width: state.element.parentElement.offsetWidth - 40,
+		width: state.element.parentElement.offsetWidth,
 		height: 200
     });
     graph.configure({
 		width: graph.element.parentElement.offsetWidth,
+		height: 200
+    });
+    cpu.configure({
+		width: cpu.element.parentElement.offsetWidth,
 		height: 200
 	});
 	state.render();
@@ -90,13 +117,39 @@ new Rickshaw.Graph.Axis.Time({
 		formatter: function(d) { return Math.floor((new Date() - d)/1000) + 's' }
     }
 });
+new Rickshaw.Graph.Axis.Time({
+    graph: cpu,
+    timeUnit: {
+        name: 'fixed',
+        seconds: 1,
+		formatter: function(d) { return Math.floor((new Date() - d)/1000) + 's' }
+    }
+});
+new Rickshaw.Graph.Axis.Time({
+    graph: memory,
+    timeUnit: {
+        name: 'fixed',
+        seconds: 1,
+		formatter: function(d) { return Math.floor((new Date() - d)/1000) + 's' }
+    }
+});
 
 new Rickshaw.Graph.HoverDetail({
     graph: graph
 });
+new Rickshaw.Graph.HoverDetail({
+    graph: state
+});
+new Rickshaw.Graph.HoverDetail({
+    graph: cpu
+});
+new Rickshaw.Graph.HoverDetail({
+    graph: memory
+});
   
 graph.render();
-// add some data every so often
+cpu.render();
+state.render();
 
 const times = {
     job: {},
@@ -154,6 +207,14 @@ var iv = setInterval( function() {
 ws.onmessage = m => {
     if (m.data[0] == '{') {
         const data =JSON.parse(m.data);
+        if (data.event == 'os') {
+            cpu.series.addData(data.data.load);
+            cpu.render();
+
+            memory.series.addData({memory: data.data.memory});
+            memory.render();
+            return;
+        }
         const d = new Date()
         const key = Math.floor(d.getTime()/1000)
         if (times[data.event][key] == null) {

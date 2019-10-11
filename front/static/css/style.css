@@ -3,18 +3,10 @@
 }
 #stateChart {
 	position: relative;
-	left: 40px;
 	display: block;
-}
-#stateChart_y_axis {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	width: 40px;
 }
 #stateChart_x_axis {
 	position: absolute;
-	left: 40px;
 	height: 40px;
 }
 main .container {

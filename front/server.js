@@ -5,8 +5,9 @@ const methodOverride = require('method-override')
 const express = require('express')
 const app = express();
 const server = require('http').Server(app);
-const request = require('request');
 const WebSocket = require('ws');
+const pidusage = require('pidusage');
+const os = require('os');
 
 const wssClient = new WebSocket('ws://listener');
 
@@ -74,6 +75,19 @@ app.use('/r/', proxy(selectProxyHost, {
         return url;
     },
 }));
+
+setInterval(() => {
+    pidusage(process.pid, (err, stat) => {
+        // console.log(process, os)
+        wssServer.broadcast(JSON.stringify({
+            'event': 'os',
+            'data': {
+                'memory': stat.memory / 1024 / 1024,
+                'load': os.loadavg()
+            }
+        }))
+    })
+}, 250)
 
 server.listen(port, function () {
     var port = server.address().port;
