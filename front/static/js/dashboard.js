@@ -19,8 +19,8 @@ var cpu = new Rickshaw.Graph( {
     renderer: 'line',
     gapSize: 0,
 	stroke: true,
-	preserve: true,
-	series: new Rickshaw.Series.FixedDuration([{ name: 'memory' }], undefined, {
+	preserve: false,
+	series: new Rickshaw.Series.FixedDuration([{name: '1'}], undefined, {
 		timeInterval: 250,
 		maxDataPoints: 30
     }),
@@ -30,11 +30,11 @@ var cpu = new Rickshaw.Graph( {
 var memory = new Rickshaw.Graph( {
 	element: document.getElementById("memoryChart"),
 	height: 200,
-    renderer: 'line',
+    renderer: 'area',
     gapSize: 0,
 	stroke: true,
 	preserve: true,
-	series: new Rickshaw.Series.FixedDuration([{ name: 'system' }], undefined, {
+	series: new Rickshaw.Series.FixedDuration([{ name: 'memory' }], undefined, {
 		timeInterval: 250,
 		maxDataPoints: 30
     }),
