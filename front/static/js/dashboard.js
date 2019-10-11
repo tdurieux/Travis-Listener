@@ -24,8 +24,7 @@ var cpu = new Rickshaw.Graph( {
 		timeInterval: 250,
 		maxDataPoints: 30
     }),
-    'min': 0,
-    'max': 1
+    'min': 0
 });
 var memory = new Rickshaw.Graph( {
 	element: document.getElementById("memoryChart"),
