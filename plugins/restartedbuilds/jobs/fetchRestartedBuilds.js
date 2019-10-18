@@ -61,9 +61,10 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             skip = job.attrs.data.index + 1
         }
         let currentRequest = []
-        const builds = await buildsaverDB.collection('builds').find({$or: [{state: 'errored'}, {state: 'failed'}]}).toArray()
+        const cursor = buildsaverDB.collection('builds').find({$or: [{state: 'errored'}, {state: 'failed'}]})
+
         let count = 0
-        for (let build of builds) {
+        while ((build = await cursor.next())) {
             if (count < skip) {
                 count++;
                 continue

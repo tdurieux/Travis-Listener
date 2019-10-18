@@ -89,7 +89,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
         let currentJobsID = []
 
-        const restartedBuilds = await buildsCollection.aggregate([
+        const cursor = buildsCollection.aggregate([
             {
             '$lookup': {
                 'from': 'jobs', 
@@ -103,10 +103,11 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 '$eq': []
                 }
             }
-        }]).toArray();
+        }]);
 
         let count = 0
-        for (let build of restartedBuilds) {
+        
+        while ((build = await cursor.next())) {
             if (count < skip) {
                 count++;
                 continue
