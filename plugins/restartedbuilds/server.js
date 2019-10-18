@@ -3,6 +3,9 @@ const compression = require('compression')
 const MongoClient = require('mongodb').MongoClient;
 const Agenda = require('agenda');
 
+const cleanLog = require('./clean_log').cleanLog
+const diff = require('diff');
+
 var port = process.env.PORT || 4000;
 const mongoURL = "mongodb://mongo:27017";
 
@@ -15,6 +18,13 @@ app.use(compression())
 
 const server = require('http').Server(app);
 
+app.use('/', express.static(__dirname + '/static'));
+    
+server.listen(port, function () {
+    var port = server.address().port;
+    console.log('App running on port ' + port);
+});
+
 (async _ => {
     await client.connect();
 
@@ -25,6 +35,7 @@ const server = require('http').Server(app);
     const buildsCollection = await db.createCollection( "builds")
     const jobsCollection = await db.createCollection( "jobs")
     const logCollection = await db.createCollection( "logs")
+    const buildSaverLogCollection = await buildsaver_db.createCollection( "logs")
 
     // create index
     await buildsCollection.createIndex('id', {unique: true})
@@ -105,13 +116,36 @@ const server = require('http').Server(app);
             }
           ]).limit(1).next());
     });
-    
-    app.use('/', express.static(__dirname + '/static'));
-    
-    server.listen(port, function () {
-        var port = server.address().port;
-        console.log('App running on port ' + port);
-    });
+
+    app.get("/api/job/diff/:id", async function (req, res) {
+        const jobId = parseInt(req.params.id)
+        const newResult = await logCollection.findOne({"id": jobId})
+        const oldResult = await buildSaverLogCollection.findOne({"id": jobId})
+        const newLog = cleanLog(newResult.log)
+        const oldLog = cleanLog(oldResult.log)
+        const lines = diff.createPatch('log',oldLog,newLog).split(/\r?\n/)
+        const output = []
+        for (let line of lines) {
+            if (line == '--- log') {
+                continue
+            }
+            if (line[0] != '-') {
+                continue
+            }
+            if (lines.indexOf('+'+line.substring(1)) > -1) {
+                continue;
+            }
+            output.push(line.substring(1))
+        }
+        res.type('txt')
+        return res.send(output.join('\n'))
+    })
+
+    app.get("/job/:id", async function (req, res) {
+        const jobId = parseInt(req.params.id)
+        const result = await buildSaverLogCollection.findOne({"id": jobId})
+        res.send(cleanLog(result.log)).end()
+    })
 })()
 
 async function graceful() {
