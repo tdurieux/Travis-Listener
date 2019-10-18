@@ -67,6 +67,8 @@ function selectProxyHost (request) {
     return url;
 }
 app.use('/r/', proxy(selectProxyHost, {
+    memoizeHost: false,
+    parseReqBody: false,
     proxyReqPathResolver: function (req) {
         let url = req.url.substring(1, req.url.length);
         const indexService = url.indexOf('/')
@@ -89,7 +91,32 @@ setInterval(() => {
     })
 }, 250)
 
+function startListenerConnection() {
+    const wsClient = new WebSocket('ws://listener');
+    wsClient.on('error', function(){
+        return setTimeout(startListenerConnection, 100);
+    })
+    wsClient.on('message', function incoming(data) {
+        wssServer.broadcast(data)
+    });
+    var that = this;
+    wsClient.on('open', function(){
+        console.log("Connect to listener")
+        that.isAlive = true;
+    })
+    wsClient.on('ping', function(){
+        that.isAlive = true;
+    })
+    wsClient.on('close', function(){
+        that.isAlive = false;
+        // Try to reconnect in 5 seconds
+        return setTimeout(startListenerConnection, 5000);
+    });
+}
+
+
 server.listen(port, function () {
     var port = server.address().port;
     console.log('App running on port ' + port);
+    startListenerConnection();
 });
