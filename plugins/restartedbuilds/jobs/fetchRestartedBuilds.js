@@ -62,7 +62,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         }
         let currentRequest = []
         const cursor = buildsaverDB.collection('builds').find({$or: [{state: 'errored'}, {state: 'failed'}]})
-        const nbBuild = cursor.count()
+        const nbBuild = cursor.size()
         let count = 0
         while ((build = await cursor.next())) {
             if (count < skip) {

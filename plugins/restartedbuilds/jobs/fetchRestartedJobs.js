@@ -105,7 +105,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
         }]);
 
-        const nbBuilds = cursor.count()
+        const nbBuilds = cursor.size()
 
         let count = 0
         
