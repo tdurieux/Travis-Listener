@@ -62,7 +62,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         }
         let currentRequest = []
         const cursor = buildsaverDB.collection('builds').find({$or: [{state: 'errored'}, {state: 'failed'}]})
-
+        const nbBuild = cursor.count()
         let count = 0
         while ((build = await cursor.next())) {
             if (count < skip) {
@@ -81,7 +81,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     } catch (error) {
                         // ignore
                     }
-                    job.attrs.data = {index: count, total: builds.length}
+                    job.attrs.data = {index: count, total: nbBuild}
                     await job.save();
                 }
                 currentRequest = []

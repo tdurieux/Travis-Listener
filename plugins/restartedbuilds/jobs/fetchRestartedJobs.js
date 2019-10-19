@@ -105,6 +105,8 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
         }]);
 
+        const nbBuilds = cursor.count()
+
         let count = 0
         
         while ((build = await cursor.next())) {
@@ -129,7 +131,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             saveLog(job.id)
                         }
                         currentJobsID = []
-                        job.attrs.data = {index: count, total: restartedBuilds.length}
+                        job.attrs.data = {index: count, total: nbBuilds}
                         await job.save();
                     }
                 }
@@ -151,7 +153,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: restartedBuilds.length}
+        job.attrs.data = {index: count, total: nbBuilds}
         await job.save();
     });
 };
