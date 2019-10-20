@@ -35,6 +35,8 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                         resolve(jobId)
                     }
                 })
+            } else {
+                resolve(jobId)
             }
         })
     }
