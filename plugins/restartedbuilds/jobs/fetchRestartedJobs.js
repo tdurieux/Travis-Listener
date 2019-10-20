@@ -127,7 +127,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     const savedJobs = await buildsaverDB.collection('jobs').find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
 
                     const newJobs = await getNewJobs(savedJobs);
-                    if (currentJobsID.length > 0) {
+                    if (newJobs.length > 0) {
                         try {
                             await jobsCollection.insertMany(newJobs)
                             for (let job of newJobs) {
