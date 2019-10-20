@@ -149,6 +149,8 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
             count++;
+            job.attrs.data = {index: count, total: nbBuilds}
+            await job.save();
         }
         if (currentJobsID.length > 0) {
             const savedJobs = await buildsaverDB.collection('jobs').find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
