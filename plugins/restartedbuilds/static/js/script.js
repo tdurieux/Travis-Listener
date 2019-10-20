@@ -8,7 +8,7 @@ $.get('/r/restartedbuilds/api/builds').then(builds => {
             continue;
         }
         count++
-        content_list += '<a href="#list-' + build.id + '" class="list-group-item list-group-item-action"  id="list-' + build.id + '-list" data-toggle="list"  role="tab" aria-controls="' + build.id + '">\
+        content_list += '<a href="#list-' + build.id + '" class="list-group-item list-group-item-action"  id="list-' + build.id + '-list" data-toggle="list"  role="tab" aria-controls="' + build.id + '" data-job-id="' + build.new.job_ids[0] + '">\
         <div class="d-flex w-100 justify-content-between">\
           <h5 class="mb-1">' + build.old.state + ' ' + build.new.state + '</h5>\
           <small>' + build.id + '</small>\
@@ -23,11 +23,9 @@ $.get('/r/restartedbuilds/api/builds').then(builds => {
     $('#restarted_builds_details').html(content_details)
 
     $('a[data-toggle="list"]').on('shown.bs.tab', function (e) {
-        const id = e.target.id.replace('-list', '').replace('list-', '')
-        $.get('/r/restartedbuilds/api/build/' + id).then(build => {
-            if (build.logs.length > 0) {
-                $("#" + e.target.id.replace('-list', '')).html('<pre>' + build.logs[0].diff + '</pre>')
-            }
+        const id = e.target.getAttribute('data-job-id')
+        $.get('/r/restartedbuilds/api/job/diff/' + id).then(log => {
+            $("#" + e.target.id.replace('-list', '')).html('<pre>' + log + '</pre>')
         })
     })
 })

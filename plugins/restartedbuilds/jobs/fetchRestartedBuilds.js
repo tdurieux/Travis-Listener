@@ -99,7 +99,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: builds.length}
+        job.attrs.data = {index: count, total: nbBuild}
         await job.save();
     });
 };

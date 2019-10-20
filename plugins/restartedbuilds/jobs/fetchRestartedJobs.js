@@ -128,7 +128,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             // ignore
                         }
                         for (let job of newJobs) {
-                            saveLog(job.id)
+                            await saveLog(job.id)
                         }
                         currentJobsID = []
                         job.attrs.data = {index: count, total: nbBuilds}

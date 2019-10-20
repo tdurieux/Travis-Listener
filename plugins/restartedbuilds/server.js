@@ -120,10 +120,16 @@ server.listen(port, function () {
     app.get("/api/job/diff/:id", async function (req, res) {
         const jobId = parseInt(req.params.id)
         const newResult = await logCollection.findOne({"id": jobId})
+        if (newResult == null) {
+            return res.status(404).send().end()
+        }
         const oldResult = await buildSaverLogCollection.findOne({"id": jobId})
+        if (oldResult == null) {
+            return res.status(404).send().end()
+        }
         const newLog = cleanLog(newResult.log)
         const oldLog = cleanLog(oldResult.log)
-        const lines = diff.createPatch('log',oldLog,newLog).split(/\r?\n/)
+        const lines = diff.createPatch('log',oldLog,newLog).split('\n')
         const output = []
         for (let line of lines) {
             if (line == '--- log') {
@@ -138,13 +144,17 @@ server.listen(port, function () {
             output.push(line.substring(1))
         }
         res.type('txt')
-        return res.send(output.join('\n'))
+        return res.send(output.join('\n')).end()
     })
 
     app.get("/job/:id", async function (req, res) {
         const jobId = parseInt(req.params.id)
         const result = await buildSaverLogCollection.findOne({"id": jobId})
-        res.send(cleanLog(result.log)).end()
+        if (result) {
+            res.send(cleanLog(result.log)).end()
+        } else {
+            res.status(404).send().end()
+        }
     })
 })()
 
