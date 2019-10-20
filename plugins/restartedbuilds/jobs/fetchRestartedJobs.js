@@ -14,23 +14,29 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
 
     async function saveLog(jobId) {
-        const log = await logCollection.findOne({"id": jobId});
-        const oldLog = await buildsaverDB.collection('logs').findOne({"id": jobId});
-        if (!log && oldLog) {
-            request('https://api.travis-ci.org/jobs/' + jobId + '/log', function (err, resp, body) {
-                if (body != null && body.length > 0) {
-                    if (body[0] == '{') {
-                        console.log(Object.keys(body))
+        return new Promise(async resolve => {
+            const log = await logCollection.findOne({"id": jobId});
+            const oldLog = await buildsaverDB.collection('logs').findOne({"id": jobId});
+            if (!log && oldLog) {
+                request('https://api.travis-ci.org/jobs/' + jobId + '/log', function (err, resp, body) {
+                    if (body != null && body.length > 0) {
+                        if (body[0] == '{') {
+                            console.log(Object.keys(body))
+                        }
+                        // body = stripAnsi(body)
+                        logCollection.insertOne({
+                            id: jobId,
+                            //diff: jsdiff.createPatch('log', oldLog.log, body),
+                            log: body
+                        }, err => {
+                            resolve(jobId)
+                        })
+                    } else {
+                        resolve(jobId)
                     }
-                    // body = stripAnsi(body)
-                    logCollection.insertOne({
-                        id: jobId,
-                        //diff: jsdiff.createPatch('log', oldLog.log, body),
-                        log: body
-                    })
-                }
-            })
-        }
+                })
+            }
+        })
     }
 
     async function getJobsFromIds(jobIds) {
@@ -124,15 +130,16 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     if (currentJobsID.length > 0) {
                         try {
                             await jobsCollection.insertMany(newJobs)
+                            for (let job of newJobs) {
+                                await saveLog(job.id)
+                            }
+                            currentJobsID = []
+                            job.attrs.data = {index: count, total: nbBuilds}
+                            await job.save();
                         } catch (error) {
                             // ignore
+                            console.log(error)
                         }
-                        for (let job of newJobs) {
-                            await saveLog(job.id)
-                        }
-                        currentJobsID = []
-                        job.attrs.data = {index: count, total: nbBuilds}
-                        await job.save();
                     }
                 }
             }
