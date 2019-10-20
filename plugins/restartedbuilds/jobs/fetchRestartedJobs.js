@@ -13,7 +13,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     const logCollection = restartedDB.collection('logs')
 
 
-    async function saveLog(jobId) {
+    function saveLog(jobId) {
         return new Promise(async resolve => {
             const log = await logCollection.findOne({"id": jobId});
             const oldLog = await buildsaverDB.collection('logs').findOne({"id": jobId});
@@ -21,7 +21,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 request('https://api.travis-ci.org/jobs/' + jobId + '/log', function (err, resp, body) {
                     if (body != null && body.length > 0) {
                         if (body[0] == '{') {
-                            console.log(Object.keys(body))
+                            console.log(body)
                         }
                         // body = stripAnsi(body)
                         logCollection.insertOne({
@@ -122,10 +122,11 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 count++;
                 continue
             }
+            console.log("Build", build.id)
             for (let jobId of build.old.job_ids) {
                 currentJobsID.push(jobId)
 
-                if (currentJobsID.length >= 50) {
+                if (currentJobsID.length >= 10) {
                     const savedJobs = await buildsaverDB.collection('jobs').find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
 
                     const newJobs = await getNewJobs(savedJobs);
@@ -133,7 +134,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                         try {
                             await jobsCollection.insertMany(newJobs)
                             for (let job of newJobs) {
+                                console.log("save log", job.id)
                                 await saveLog(job.id)
+                                console.log("end save log", job.id)
                             }
                             currentJobsID = []
                             job.attrs.data = {index: count, total: nbBuilds}
@@ -158,7 +161,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     // ignore
                 }
                 for (let job of newJobs) {
-                    saveLog(job.id)
+                    await saveLog(job.id)
                 }
             }
         }
