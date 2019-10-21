@@ -136,13 +136,13 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 currentJobsID.push(jobId)
 
                 if (currentJobsID.length >= 10) {
-                    console.log("Fetch Jobs", currentJobsID)
+                    console.log("Fetch Jobs", currentJobsID.join(' '))
                     const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
-                    console.log("End Fetch Jobs", currentJobsID)
+                    console.log("End Fetch Jobs", currentJobsID.join(' '))
 
-                    console.log("Get jobs", currentJobsID)
+                    console.log("Get jobs", currentJobsID.join(' '))
                     const newJobs = await getNewJobs(savedJobs);
-                    console.log("End Get Jobs", currentJobsID)
+                    console.log("End Get Jobs", currentJobsID.join(' '))
                     if (newJobs.length > 0) {
                         try {
                             await jobsCollection.insertMany(newJobs)
