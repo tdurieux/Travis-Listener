@@ -221,12 +221,10 @@ function connect (err) {
             }
             if (data.event == 'build_updated') {
                 const build = data.data
-                delete build.config
                 buildsCollection.updateOne({id: build.id}, {$set: build}, {upsert: true})
             }
             if (data.event == 'job') {
                 const job = data.data
-                delete job.config
                 if (job.state == "failed" || job.state == "errored") {
                     saveLog(job.id);
                 }
@@ -243,7 +241,6 @@ function connect (err) {
             }
             if (data.event == 'job_updated') {
                 const job = data.data
-                delete job.config
                 if (job.state == "failed" || job.state == "errored") {
                     saveLog(job.id);
                 }
