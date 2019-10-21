@@ -61,7 +61,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             skip = job.attrs.data.index + 1
         }
         let currentRequest = []
-        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}]}]})
+        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}]}]}).sort( { _id: -1 } );
         const nbBuild = await cursor.count()
         let count = 0
         while ((build = await cursor.next())) {

@@ -115,7 +115,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         //         }
         //     }
         // }]
-        const cursor = buildsCollection.find();
+        const cursor = buildsCollection.find().sort( { _id: -1 } );
 
         const nbBuilds = 0
 
@@ -136,13 +136,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 currentJobsID.push(jobId)
 
                 if (currentJobsID.length >= 200) {
-                    console.log("Fetch Jobs")
                     const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
-                    console.log("End Fetch Jobs")
 
-                    console.log("Get jobs")
                     const newJobs = await getNewJobs(savedJobs);
-                    console.log("End Get Jobs")
                     if (newJobs.length > 0) {
                         try {
                             await jobsCollection.insertMany(newJobs)
