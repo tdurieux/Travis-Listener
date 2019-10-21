@@ -26,7 +26,13 @@ function cleanGitHubObj(obj) {
     return obj
 }
 
-client.connect(function(err) {
+function connect (err) {
+    if (err) {
+        setTimeout(() => {
+            client.connect(connect);
+        }, 1000)
+        return;
+    }
     console.log("Connected successfully to server", err);
     
     const db = client.db("buildsaver");
@@ -248,5 +254,7 @@ client.connect(function(err) {
     });
   
     // client.close();
-});
+}
+
+client.connect(connect);
 
