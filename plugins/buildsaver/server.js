@@ -212,7 +212,6 @@ function connect (err) {
             }
             if (data.event == 'build') {
                 const build = data.data
-                delete build.config
                 buildsCollection.insertOne(build, (err, result) => {
                     if (err) {
                         delete build._id;
