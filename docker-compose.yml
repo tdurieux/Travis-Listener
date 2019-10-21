@@ -71,7 +71,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-    cpuset: "0"
+    cpu_count: 5
 volumes:
   db-data:
 
