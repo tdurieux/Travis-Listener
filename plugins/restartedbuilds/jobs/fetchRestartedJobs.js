@@ -151,7 +151,6 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                                 await saveLog(job.id)
                                 console.log("end save log", job.id)
                             }
-                            currentJobsID = []
                             job.attrs.data = {index: count, total: nbBuilds}
                             await job.save();
                         } catch (error) {
@@ -159,6 +158,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             console.log(error)
                         }
                     }
+                    currentJobsID = []
                 }
             }
             count++;
