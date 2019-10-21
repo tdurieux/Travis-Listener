@@ -92,12 +92,6 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     }
 
     agenda.define('fetch restarted jobs', {concurrency: 1}, async job => {
-
-        let skip = 0
-        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index < job.attrs.total) {
-            skip = job.attrs.data.index
-        }
-
         let currentJobsID = []
 
         // [
@@ -115,18 +109,20 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         //         }
         //     }
         // }]
-        const cursor = buildsCollection.find().sort( { _id: -1 } );
+        const cursor = buildsCollection.find({}, {id: 1, old: 1}).sort( { _id: -1 } );
 
         const nbBuilds = await cursor.count()
 
         let count = 0
+
+        const checked = new Set()
         
         while ((build = await cursor.next())) {
-            if (count < skip) {
-                count++;
+            console.log("Build", build.id)
+            if (checked.has(build.id)) {
                 continue
             }
-            console.log("Build", build.id)
+            checked.add(build.id)
             for (let jobId of build.old.job_ids) {
                 const currentJob = await jobsCollection.findOne({id: jobId});
                 if (currentJob != null) {

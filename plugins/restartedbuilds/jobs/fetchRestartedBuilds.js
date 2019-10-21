@@ -56,20 +56,11 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     agenda.define('fetch restarted builds', {concurrency: 1}, async job => {
         const maxRequest = 250
 
-        let skip = 0
-        if (job.attrs.data && job.attrs.data.index && job.attrs.data.index < job.attrs.total) {
-            skip = job.attrs.data.index + 1
-        }
         let currentRequest = []
         const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}]}]}).sort( { _id: -1 } );
         const nbBuild = await cursor.count()
         let count = 0
         while ((build = await cursor.next())) {
-            if (count < skip) {
-                count++;
-                continue
-            }
-
             currentRequest.push(build)
             if (currentRequest.length >= maxRequest) {
                 const newBuilds = await getNewBuild(currentRequest);
