@@ -128,12 +128,12 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
             console.log("Build", build.id)
             for (let jobId of build.old.job_ids) {
-                currentJobsID.push(jobId)
                 const currentJob = await jobsCollection.findOne({id: jobId});
                 if (currentJob != null) {
                     // job exist skip
                     continue
                 }
+                currentJobsID.push(jobId)
 
                 if (currentJobsID.length >= 10) {
                     console.log("Fetch Jobs", currentJobsID)
