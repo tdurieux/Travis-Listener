@@ -117,9 +117,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         // }]
         const cursor = buildsCollection.find().sort( { _id: -1 } );
 
-        const nbBuilds = 0
+        const nbBuilds = await cursor.count()
 
-        let count = cursor.count()
+        let count = 0
         
         while ((build = await cursor.next())) {
             if (count < skip) {
