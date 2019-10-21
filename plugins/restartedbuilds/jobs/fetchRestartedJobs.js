@@ -12,11 +12,14 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     const jobsCollection = restartedDB.collection('jobs')
     const logCollection = restartedDB.collection('logs')
 
+    const jobsBuildsaverCollection = buildsaverDB.collection('jobs')
+    const logBuildsaverCollection = buildsaverDB.collection('logs')
+
 
     function saveLog(jobId) {
         return new Promise(async resolve => {
             const log = await logCollection.findOne({"id": jobId});
-            const oldLog = await buildsaverDB.collection('logs').findOne({"id": jobId});
+            const oldLog = await logBuildsaverCollection.findOne({"id": jobId});
             if (!log && oldLog) {
                 request('https://api.travis-ci.org/jobs/' + jobId + '/log', function (err, resp, body) {
                     if (body != null && body.length > 0) {
@@ -97,21 +100,22 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
         let currentJobsID = []
 
-        const cursor = buildsCollection.aggregate([
-            {
-            '$lookup': {
-                'from': 'jobs', 
-                'localField': 'old.job_ids', 
-                'foreignField': 'id', 
-                'as': 'jobs'
-            }
-            }, {
-            '$match': {
-                'jobs': {
-                '$eq': []
-                }
-            }
-        }]);
+        // [
+        //     {
+        //     '$lookup': {
+        //         'from': 'jobs', 
+        //         'localField': 'old.job_ids', 
+        //         'foreignField': 'id', 
+        //         'as': 'jobs'
+        //     }
+        //     }, {
+        //     '$match': {
+        //         'jobs': {
+        //         '$eq': []
+        //         }
+        //     }
+        // }]
+        const cursor = buildsCollection.find();
 
         const nbBuilds = 0
 
@@ -125,11 +129,20 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             console.log("Build", build.id)
             for (let jobId of build.old.job_ids) {
                 currentJobsID.push(jobId)
+                const currentJob = await jobsCollection.findOne({id: jobId});
+                if (currentJob != null) {
+                    // job exist skip
+                    continue
+                }
 
                 if (currentJobsID.length >= 10) {
-                    const savedJobs = await buildsaverDB.collection('jobs').find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
+                    console.log("Fetch Jobs", currentJobsID)
+                    const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
+                    console.log("End Fetch Jobs", currentJobsID)
 
+                    console.log("Get jobs", currentJobsID)
                     const newJobs = await getNewJobs(savedJobs);
+                    console.log("End Get Jobs", currentJobsID)
                     if (newJobs.length > 0) {
                         try {
                             await jobsCollection.insertMany(newJobs)
@@ -153,7 +166,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             await job.save();
         }
         if (currentJobsID.length > 0) {
-            const savedJobs = await buildsaverDB.collection('jobs').find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
+            const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
 
             const newJobs = await getNewJobs(savedJobs);
             if (currentJobsID.length > 0) {
