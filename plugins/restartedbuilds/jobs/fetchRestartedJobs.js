@@ -76,7 +76,6 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const newJobs = await getJobsFromIds(Object.keys(jobObj));
         for (let job of newJobs) {
             delete job.commit;
-            delete job.config;
             
             
             if (jobObj[job.id].started_at < job.started_at && job.state != 'started') {
