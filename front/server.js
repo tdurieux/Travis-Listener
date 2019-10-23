@@ -6,10 +6,9 @@ const express = require('express')
 const app = express();
 const server = require('http').Server(app);
 const WebSocket = require('ws');
-const pidusage = require('pidusage');
 const os = require('os');
 
-const wssClient = new WebSocket('ws://listener');
+const serverStat = require('./server_stat')
 
 app.use('/', express.static(__dirname + '/static'));
 
@@ -26,6 +25,7 @@ app.use(function(req, res, next) {
 });
 
 const wssServer = new WebSocket.Server({ server });
+serverStat.monitorWebSocket(wssServer)
 
 wssServer.on('connection', function connection(ws) {
     ws.isAlive = true;
@@ -54,9 +54,6 @@ wssServer.broadcast = function broadcast(data) {
         }
     });
 };
-wssClient.on('message', function incoming(data) {
-  wssServer.broadcast(data)
-});
 
 function selectProxyHost (request) {
     let url = request.url.substring(1, request.url.length);
@@ -78,40 +75,31 @@ app.use('/r/', proxy(selectProxyHost, {
     },
 }));
 
-setInterval(() => {
-    pidusage(process.pid, (err, stat) => {
-        // console.log(process, os)
-        wssServer.broadcast(JSON.stringify({
-            'event': 'os',
-            'data': {
-                'memory': stat.memory / 1024 / 1024,
-                'load': os.loadavg()
-            }
-        }))
-    })
-}, 250)
-
 function startListenerConnection() {
-    const wsClient = new WebSocket('ws://listener');
-    wsClient.on('error', function(){
+    try {
+        const wsClient = new WebSocket('ws://listener');
+        wsClient.on('error', function(){
+            return setTimeout(startListenerConnection, 100);
+        })
+        wsClient.on('message', function incoming(data) {
+            wssServer.broadcast(data)
+        });
+        var that = this;
+        wsClient.on('open', function(){
+            console.log("Connect to listener")
+            that.isAlive = true;
+        })
+        wsClient.on('ping', function(){
+            that.isAlive = true;
+        })
+        wsClient.on('close', function(){
+            that.isAlive = false;
+            // Try to reconnect in 5 seconds
+            return setTimeout(startListenerConnection, 5000);
+        });
+    } catch (e) {
         return setTimeout(startListenerConnection, 100);
-    })
-    wsClient.on('message', function incoming(data) {
-        wssServer.broadcast(data)
-    });
-    var that = this;
-    wsClient.on('open', function(){
-        console.log("Connect to listener")
-        that.isAlive = true;
-    })
-    wsClient.on('ping', function(){
-        that.isAlive = true;
-    })
-    wsClient.on('close', function(){
-        that.isAlive = false;
-        // Try to reconnect in 5 seconds
-        return setTimeout(startListenerConnection, 5000);
-    });
+    }
 }
 
 

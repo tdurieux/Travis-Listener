@@ -5,9 +5,10 @@ services:
     command: nodemon server.js
     volumes:
       - ./front:/app
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "5001:80"
-      - "5858:5858"
+      - "5525:5525"
     networks:
       - front-tier
       - back-tier

@@ -6,39 +6,20 @@ let protocol = 'ws'
 if (location.protocol == 'https:') {
     protocol = 'wss'
 }
-const ws = new WebSocket(protocol + '://' + wsUrl)
+travisListener.connect({
+    url: protocol + '://' + wsUrl
+})
+
+let statWsUrl = location.hostname + ':5525'
+if (location.hostname != 'localhost') {
+    statWsUrl = location.hostname + '/ws/'
+}
+const statWS = new WebSocket(protocol + '://' + statWsUrl)
 
 
 var tv = 1000;
 var maxPoints = 30
 var previousTime = null;
-
-var cpu = new Rickshaw.Graph( {
-	element: document.getElementById("cpuChart"),
-	height: 200,
-    renderer: 'line',
-    gapSize: 0,
-	stroke: true,
-	preserve: false,
-	series: new Rickshaw.Series.FixedDuration([{name: '1'}], undefined, {
-		timeInterval: 250,
-		maxDataPoints: 30
-    }),
-    'min': 0
-});
-var memory = new Rickshaw.Graph( {
-	element: document.getElementById("memoryChart"),
-	height: 200,
-    renderer: 'area',
-    gapSize: 0,
-	stroke: true,
-	preserve: true,
-	series: new Rickshaw.Series.FixedDuration([{ name: 'memory' }], undefined, {
-		timeInterval: 250,
-		maxDataPoints: 30
-    }),
-    'min': 0
-});
 
 var graph = new Rickshaw.Graph( {
 	element: document.getElementById("travisChart"),
@@ -53,6 +34,32 @@ var graph = new Rickshaw.Graph( {
 		timeBase: new Date().getTime() / 1000
 	}) 
 } );
+var cpu = new Rickshaw.Graph( {
+	element: document.getElementById("cpuChart"),
+	height: 200,
+    renderer: 'line',
+    gapSize: 0,
+	stroke: true,
+	preserve: true,
+	series: new Rickshaw.Series.FixedDuration([{ name: 'front' }], undefined, {
+		timeInterval: 500,
+		maxDataPoints: 20,
+		timeBase: new Date().getTime() / 1000
+	}) 
+} );
+var memory = new Rickshaw.Graph( {
+	element: document.getElementById("memoryChart"),
+	height: 200,
+    renderer: 'line',
+    gapSize: 0,
+	stroke: true,
+	preserve: true,
+	series: new Rickshaw.Series.FixedDuration([{ name: 'front' }], undefined, {
+		timeInterval: 500,
+		maxDataPoints: 20,
+		timeBase: new Date().getTime() / 1000
+	}) 
+} );
 
 var state = new Rickshaw.Graph( {
 	element: document.getElementById("stateChart"),
@@ -62,7 +69,6 @@ var state = new Rickshaw.Graph( {
 	preserve: true,
 	series: [
 		{
-			name: 'Sate',
             color: '#c05020',
             data: []
         }
@@ -71,29 +77,35 @@ var state = new Rickshaw.Graph( {
 
 var resize = function() {
 	state.configure({
-		width: state.element.parentElement.offsetWidth,
+		width: state.element.parentElement.offsetWidth - 40,
+		height: 200
+    });
+    cpu.configure({
+		width: cpu.element.parentElement.offsetWidth - 40,
+		height: 200
+    });
+    memory.configure({
+		width: memory.element.parentElement.offsetWidth - 40,
 		height: 200
     });
     graph.configure({
 		width: graph.element.parentElement.offsetWidth,
 		height: 200
     });
-    cpu.configure({
-		width: cpu.element.parentElement.offsetWidth,
-		height: 200
-	});
 	state.render();
 }
 window.addEventListener('resize', resize); 
 resize();
 
 var stateMap = {
-    0: 'Started',
-    1: 'Passed',
-    2: 'Failed',
-    3: 'Errored',
-    4: 'Queued',
-    5: 'Received'
+    0: 'Passed',
+    1: 'Failed',
+    2: 'Errored',
+    3: 'Canceled',
+    4: 'Started',
+    5: 'Created',
+    6: 'Queued',
+    7: 'Received',
 };
 
 var format = function(n) {
@@ -117,7 +129,7 @@ new Rickshaw.Graph.Axis.Time({
     }
 });
 new Rickshaw.Graph.Axis.Time({
-    graph: cpu,
+    graph: memory,
     timeUnit: {
         name: 'fixed',
         seconds: 1,
@@ -125,7 +137,7 @@ new Rickshaw.Graph.Axis.Time({
     }
 });
 new Rickshaw.Graph.Axis.Time({
-    graph: memory,
+    graph: cpu,
     timeUnit: {
         name: 'fixed',
         seconds: 1,
@@ -137,17 +149,23 @@ new Rickshaw.Graph.HoverDetail({
     graph: graph
 });
 new Rickshaw.Graph.HoverDetail({
-    graph: state
-});
-new Rickshaw.Graph.HoverDetail({
     graph: cpu
 });
 new Rickshaw.Graph.HoverDetail({
     graph: memory
 });
+new Rickshaw.Graph.HoverDetail({
+    graph: state,
+    formatter: function(series, x, y) {
+		var date = '<span class="state">' + stateMap[x] + '</span>';
+		var content = date + ": " + parseInt(y);
+		return content;
+	}
+});
   
 graph.render();
 cpu.render();
+memory.render();
 state.render();
 
 const times = {
@@ -203,22 +221,30 @@ var iv = setInterval( function() {
 }, tv );
 
 
-ws.onmessage = m => {
-    if (m.data[0] == '{') {
-        const data =JSON.parse(m.data);
-        if (data.event == 'os') {
-            cpu.series.addData(data.data.load);
-            cpu.render();
+travisListener.on((data, event) => {
+    const d = new Date()
+    const key = Math.floor(d.getTime()/1000)
+    if (times[event][key] == null) {
+        times[event][key] = []
+    }
+    times[event][key].push(data)
+});
 
-            memory.series.addData({memory: data.data.memory});
-            memory.render();
-            return;
+statWS.onmessage = m => {
+    const data = JSON.parse(m.data);
+    if (data.event == 'os') {
+        document.getElementById('clients').innerText = data.data.connectedClient
+
+        const cpuData = {}
+        const memoryData = {}
+
+        for (let service in data.data.services) {
+            cpuData[service] = data.data.services[service].cpu_percent
+            memoryData[service] = data.data.services[service].mem_percent
         }
-        const d = new Date()
-        const key = Math.floor(d.getTime()/1000)
-        if (times[data.event][key] == null) {
-            times[data.event][key] = []
-        }
-        times[data.event][key].push(data.data)
+        cpu.series.addData(cpuData);
+        cpu.render();
+        memory.series.addData(memoryData);
+        memory.render();
     }
 }

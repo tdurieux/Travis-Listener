@@ -13,7 +13,9 @@ RUN npm ci \
 COPY . .
 
 ENV PORT 80
+ENV SERVICE_PORT 5525
 
 EXPOSE 80
+EXPOSE 5525
 
 CMD ["node", "server.js"]
