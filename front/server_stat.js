@@ -36,10 +36,10 @@ setInterval(async () => {
             connectedClient: 0
         }
         for (let container of data) {
-            if (container.image.indexOf(APP_NAME) > -1) {
+            if (container.name.indexOf(APP_NAME) > -1) {
                 const stat = (await dockerstats.dockerContainerStats(container.id))[0];
 
-                const name = container.image.replace(APP_NAME + '_', '')
+                const name = container.name.replace(APP_NAME + '_', '')
                 output.services[name] = {
                     mem_usage: stat.mem_usage,
                     mem_limit: stat.mem_limit,
@@ -64,7 +64,6 @@ setInterval(async () => {
 }, 500)
 
 server.listen(port, function (err) {
-    console.log(err)
     var port = server.address().port;
     console.log('Server Stat Service running on port ' + port);
 });
