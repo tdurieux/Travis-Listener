@@ -3,6 +3,8 @@ const compression = require('compression')
 const MongoClient = require('mongodb').MongoClient;
 const Agenda = require('agenda');
 
+const stat = require('./stat').stat
+
 const cleanLog = require('./clean_log').cleanLog
 const diff = require('diff');
 
@@ -155,6 +157,12 @@ server.listen(port, function () {
         } else {
             res.status(404).send().end()
         }
+    })
+
+    app.get('/api/stat/', async function (req, res) {
+        const results = await stat(buildsCollection, jobsCollection)
+        console.log(results)
+        res.json(results);
     })
 })()
 
