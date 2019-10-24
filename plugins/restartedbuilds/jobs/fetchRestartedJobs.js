@@ -66,12 +66,15 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const jobObj = {};
         for (let job of jobs) {
             jobObj[job.id] = job
+            if (job.config && job.config['.result']) {
+                job.config.result = job.config['.result']
+                delete job.config['.result'];
+            }
         }
         const newJobs = await getJobsFromIds(Object.keys(jobObj));
         for (let job of newJobs) {
             delete job.commit;
             
-            console.log(jobObj[job.id].started_at, job.started_at, job.state)
             if (jobObj[job.id].started_at < job.started_at && job.state != 'started') {
                 restartedJobs.push({
                     id: job.id,

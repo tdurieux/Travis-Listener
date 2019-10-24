@@ -29,6 +29,10 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const restartedBuilds = []
         const buildObj = {};
         for (let build of builds) {
+            if (build.config && build.config['.result']) {
+                build.config.result = build.config['.result']
+                delete build.config['.result'];
+            }
             buildObj[build.id] = build
         }
         const newBuilds = await getBuildsFromIds(Object.keys(buildObj));
