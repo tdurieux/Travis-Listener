@@ -1,32 +1,27 @@
-const Travis = require('travis-ci');
-
-const travis = new Travis({
-    version: '2.0.0'
-});
+const request = require('request');
 
 module.exports = function(agenda, restartedDB, buildsaverDB) {
     const buildsCollection = restartedDB.collection('builds')
-
     async function getBuildsFromIds(buildIds) {
         return new Promise((resolve, reject) => {
-            travis.builds('?ids[]=' + buildIds.join('&ids[]=') + "&random=" + Math.random()).get((err, data) => {
+            request.get('http://listener/api/builds?id=' + buildIds.join(','), function (err, res, body) {
                 if (err) {
                     return reject(err);
                 }
-                let items = data.builds;
-                const commits = data.commits;
-    
-                for(let i in items) {
-                    if (items[i].started_at) {
-                        items[i].started_at = new Date(items[i].started_at)
+                const items = JSON.parse(body);
+                items.forEach(i => {
+                    if (i.started_at) {
+                        i.started_at = new Date(i.started_at)
                     }
-                    if (items[i].finished_at) {
-                        items[i].finished_at = new Date(items[i].finished_at)
+                    if (i.updated_at) {
+                        i.updated_at = new Date(i.updated_at)
                     }
-                    items[i].commit = commits[i];
-                }
-                return resolve(items);
-            });
+                    if (i.finished_at) {
+                        i.finished_at = new Date(i.finished_at)
+                    }
+                });
+                resolve(items);
+            })
         });
     };
 
@@ -70,6 +65,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                         await job.touch();
                     } catch (error) {
                         // ignore
+                        console.error(error)
                     }
                     job.attrs.data = {index: count, total: nbBuild}
                     await job.save();
@@ -86,6 +82,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     await job.touch();
                 } catch (error) {
                     // ignore
+                    console.error(error)
                 }
             }
         }

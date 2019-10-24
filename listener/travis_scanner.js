@@ -12,6 +12,38 @@ const travis = new Travis({
     version: '2.0.0'
 });
 
+function cleanGitHubObj(obj) {
+    if (typeof obj !== 'object') {
+        return obj
+    }
+    for (let key in obj) {
+        if (obj[key] == null) {
+            continue;
+        }
+
+        if (obj[key].started_at) {
+            obj[key].started_at = new Date(obj[key].started_at)
+        }
+        if (obj[key].updated_at) {
+            obj[key].updated_at = new Date(obj[key].updated_at)
+        }
+        if (obj[key].finished_at) {
+            obj[key].finished_at = new Date(obj[key].finished_at)
+        }
+        if (key.indexOf('.') > -1) {
+            obj[key.replace(/\./g, '')] = obj[key]
+            delete obj[key]
+            key = key.replace(/\./g, '')
+        }
+        if (key.indexOf('url') > -1) {
+            delete obj[key]
+        } else {
+            obj[key] = cleanGitHubObj(obj[key])
+        }
+    }
+    return obj
+}
+
 function generateIds(minId, number, reverse) {
     if (reverse == null) {
         reverse = false;
@@ -66,6 +98,7 @@ async function getItems(func, query) {
 
             for(let i in items) {
                 items[i].commit = commits[i];
+                items[i] = cleanGitHubObj(items[i]);
             }
             return resolve(items);
         });

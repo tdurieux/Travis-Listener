@@ -46,6 +46,18 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.get('/api/builds', async function (req, res) {
+    const ids = req.query.id.split(',');
+    const builds = await scanner.getBuildsFromIds(ids)
+    res.json(builds);
+});
+
+app.get('/api/jobs', async function (req, res) {
+    const ids = req.query.id.split(',');
+    const builds = await scanner.getJobsFromIds(ids)
+    res.json(builds);
+});
+
 scanner.scan();
 scanner.emitter.on("job", job => {
   wss.broadcast({

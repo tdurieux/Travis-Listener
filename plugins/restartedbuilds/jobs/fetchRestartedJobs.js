@@ -1,11 +1,5 @@
 const request = require('request')
 const stripAnsi = require('strip-ansi');
-const Travis = require('travis-ci');
-const jsdiff = require('diff');
-
-const travis = new Travis({
-    version: '2.0.0'
-});
 
 module.exports = function(agenda, restartedDB, buildsaverDB) {
     const buildsCollection = restartedDB.collection('builds')
@@ -44,26 +38,26 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         })
     }
 
-    async function getJobsFromIds(jobIds) {
+    async function getJobsFromIds(buildIds) {
         return new Promise((resolve, reject) => {
-            travis.jobs('?ids[]=' + jobIds.join('&ids[]=') + "&random=" + Math.random()).get((err, data) => {
+            request.get('http://listener/api/jobs?id=' + buildIds.join(','), function (err, res, body) {
                 if (err) {
                     return reject(err);
                 }
-                let items = data.jobs;
-                const commits = data.commits;
-    
-                for(let i in items) {
-                    if (items[i].started_at) {
-                        items[i].started_at = new Date(items[i].started_at)
+                const items = JSON.parse(body);
+                items.forEach(i => {
+                    if (i.started_at) {
+                        i.started_at = new Date(i.started_at)
                     }
-                    if (items[i].finished_at) {
-                        items[i].finished_at = new Date(items[i].finished_at)
+                    if (i.updated_at) {
+                        i.updated_at = new Date(i.updated_at)
                     }
-                    items[i].commit = commits[i];
-                }
-                return resolve(items);
-            });
+                    if (i.finished_at) {
+                        i.finished_at = new Date(i.finished_at)
+                    }
+                });
+                resolve(items);
+            })
         });
     };
 
@@ -146,7 +140,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             await job.save();
                         } catch (error) {
                             // ignore
-                            console.log(error)
+                            console.error(error)
                         }
                     }
                     currentJobsID = []
@@ -165,6 +159,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     await jobsCollection.insertMany(newJobs)
                 } catch (error) {
                     // ignore
+                    console.error(error)
                 }
                 for (let job of newJobs) {
                     await saveLog(job.id)
