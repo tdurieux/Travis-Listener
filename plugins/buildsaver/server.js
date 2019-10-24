@@ -10,8 +10,6 @@ const app = express();
 
 var port = process.env.PORT || 4000;
 
-const wss = new WebSocket('ws://listener');
-
 function cleanGitHubObj(obj) {
     if (typeof obj !== 'object') {
         return obj
@@ -26,7 +24,7 @@ function cleanGitHubObj(obj) {
     return obj
 }
 
-function connect (err) {
+async function connect (err) {
     if (err) {
         setTimeout(() => {
             client.connect(connect);
@@ -44,21 +42,25 @@ function connect (err) {
     db.createCollection( "unknown_users")
     db.createCollection( "logs")
     const buildsCollection = db.collection('builds')
-    buildsCollection.createIndex('id', {unique: true})
+    
     const jobsCollection = db.collection('jobs')
-    jobsCollection.createIndex('id', {unique: true})
     const commitsCollection = db.collection('commits')
+    const repositoriesCollection = db.collection('repositories')
+    const usersCollection = db.collection('users')
+    const logCollection = db.collection('logs')
+    const unknownUsersCollection = db.collection('unknown_users')
+
+    jobsCollection.createIndex('id', {unique: true})
     commitsCollection.createIndex('id', {unique: true})
     commitsCollection.createIndex('sha', {unique: true})
-    const repositoriesCollection = db.collection('repositories')
     repositoriesCollection.createIndex('id', {unique: true})
-    const usersCollection = db.collection('users')
-    usersCollection.createIndex('id', {unique: true})
-    const logCollection = db.collection('logs')
-    logCollection.createIndex('id', {unique: true})
     
-    const unknownUsersCollection = db.collection('unknown_users')
+    usersCollection.createIndex('id', {unique: true})
+    buildsCollection.createIndex('id', {unique: true})
     unknownUsersCollection.createIndex(['author_email', 'author_name', 'committer_email', 'committer_name'], {unique: true})
+    try {
+        await logCollection.createIndex('id', {unique: true})
+    } catch (error) {}
     
 
     function findUser(committer_name, author_name, author_email, committer_email) {
@@ -174,7 +176,7 @@ function connect (err) {
             }
         })
     }
-    wss.on('message', function incoming(data) {
+    function incomingMessage (data) {
         if (data[0] == '{') {
             data = JSON.parse(data);
             if (data.data.finished_at) {
@@ -247,7 +249,34 @@ function connect (err) {
                 jobsCollection.updateOne({id: job.id}, {$set: job}, {upsert: true})
             }
         }
-    });
+    };
+
+    function startListenerConnection() {
+        try {
+            const wsClient = new WebSocket('ws://listener');
+            wsClient.on('error', function(){
+                return setTimeout(startListenerConnection, 100);
+            })
+            wsClient.on('message', incomingMessage);
+            var that = this;
+            wsClient.on('open', function(){
+                console.log("Connect to listener")
+                that.isAlive = true;
+            })
+            wsClient.on('ping', function(){
+                that.isAlive = true;
+            })
+            wsClient.on('close', function(){
+                that.isAlive = false;
+                // Try to reconnect in 5 seconds
+                return setTimeout(startListenerConnection, 5000);
+            });
+        } catch (e) {
+            return setTimeout(startListenerConnection, 100);
+        }
+    }
+    console.log("here")
+    startListenerConnection();
   
     // client.close();
 }

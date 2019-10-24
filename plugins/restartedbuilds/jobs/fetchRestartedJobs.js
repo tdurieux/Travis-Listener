@@ -71,7 +71,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         for (let job of newJobs) {
             delete job.commit;
             
-            
+            console.log(jobObj[job.id].started_at, job.started_at, job.state)
             if (jobObj[job.id].started_at < job.started_at && job.state != 'started') {
                 restartedJobs.push({
                     id: job.id,
@@ -150,6 +150,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             job.attrs.data = {index: count, total: nbBuilds}
             await job.save();
         }
+        
         if (currentJobsID.length > 0) {
             const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
 

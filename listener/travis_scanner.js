@@ -14,9 +14,14 @@ const travis = new Travis({
 
 function cleanGitHubObj(obj) {
     if (typeof obj !== 'object') {
-        return obj
+        return obj;
     }
     for (let key in obj) {
+        if (key.indexOf('.') > -1) {
+            obj[key.replace(/\./g, '')] = obj[key]
+            delete obj[key]
+            key = key.replace(/\./g, '')
+        }
         if (obj[key] == null) {
             continue;
         }
@@ -29,11 +34,6 @@ function cleanGitHubObj(obj) {
         }
         if (obj[key].finished_at) {
             obj[key].finished_at = new Date(obj[key].finished_at)
-        }
-        if (key.indexOf('.') > -1) {
-            obj[key.replace(/\./g, '')] = obj[key]
-            delete obj[key]
-            key = key.replace(/\./g, '')
         }
         if (key.indexOf('url') > -1) {
             delete obj[key]

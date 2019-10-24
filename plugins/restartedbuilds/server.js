@@ -161,7 +161,6 @@ server.listen(port, function () {
 
     app.get('/api/stat/', async function (req, res) {
         const results = await stat(buildsCollection, jobsCollection)
-        console.log(results)
         res.json(results);
     })
 })()
