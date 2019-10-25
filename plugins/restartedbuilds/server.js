@@ -146,6 +146,7 @@ server.listen(port, function () {
             output.push(line.substring(1))
         }
         res.type('txt')
+        res.set('Cache-Control', 'public, max-age=2592000, s-maxage=2592000');
         return res.send(output.join('\n')).end()
     })
 

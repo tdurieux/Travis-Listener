@@ -17,7 +17,8 @@ const startWith = [
     'Fetched',
     'Updating files:',
     'This take some time...',
-    'travis_time:'
+    'travis_time:',
+    'travis_fold'
 ]
 const toRemove = [
     // date
@@ -42,7 +43,7 @@ const toRemove = [
     /([0-9\.]+) ?MB\/s/gi,
     /([0-9\.]+)M=0s/gi,
     /\[([0-9\,\.]+) ?k?M?B\]/gi,
-    /([0-9\.]+) seconds/g,
+    /([0-9\.]+) (seconds|secs)/g,
     / ... /g,
     /(▉|█|▋)+/g,
     // ip
