@@ -7,9 +7,12 @@ const properties = [
     /(startup:).*/g,
     /(travis-build version:).*/g,
     /(process ).*/g,
-    /(Get|Ign|Hit):[0-9]+/g,
+    // /(Get|Ign|Hit):[0-9]+/g,
 ]
 const startWith = [
+    'Get',
+    'Ing',
+    'Hit',
     'Receiving objects:',
     'Resolving deltas:',
     'Unpacking objects:',
