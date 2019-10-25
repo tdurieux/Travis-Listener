@@ -11,7 +11,7 @@ const properties = [
 ]
 const startWith = [
     'Get',
-    'Ing',
+    'Ign',
     'Hit',
     'Receiving objects:',
     'Resolving deltas:',
