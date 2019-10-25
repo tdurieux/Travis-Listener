@@ -59,6 +59,15 @@ async function connect (err) {
     buildsCollection.createIndex('id', {unique: true})
     unknownUsersCollection.createIndex(['author_email', 'author_name', 'committer_email', 'committer_name'], {unique: true})
     try {
+        await usersCollection.createIndex('email', {unique: true})
+        await usersCollection.createIndex('name', {unique: true})
+
+        await unknownUsersCollection.createIndex('author_email', {unique: true})
+        await unknownUsersCollection.createIndex('author_name', {unique: true})
+
+        await unknownUsersCollection.createIndex('committer_email', {unique: true})
+        await unknownUsersCollection.createIndex('committer_name', {unique: true})
+
         await logCollection.createIndex('id', {unique: true})
     } catch (error) {}
     
