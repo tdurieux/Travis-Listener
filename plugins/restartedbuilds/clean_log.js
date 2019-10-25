@@ -18,7 +18,10 @@ const startWith = [
     'Updating files:',
     'This take some time...',
     'travis_time:',
-    'travis_fold'
+    'travis_fold',
+    'remote:',
+    '/home/travis/',
+    '...'
 ]
 const toRemove = [
     // date
@@ -29,9 +32,6 @@ const toRemove = [
     /([0-9]+)\/([0-9]+)\/([0-9]+) ([0-9]+):([0-9]+):([0-9]+) (PM|AM|pm|am)/g,
     /([0-9]+):([0-9]+):([0-9]+)/g,
     // travis stuffs
-    // /.*travis_.*/g,
-    // /.*remote:.*/g,
-    // /.*\/home\/travis\/\.cache.*/g,
     /\(([0-9]+)\/([0-9]+)\)/g,
     // ids
     /([0-9]{5,})/g,
@@ -44,8 +44,8 @@ const toRemove = [
     /([0-9\.]+)M=0s/gi,
     /\[([0-9\,\.]+) ?k?M?B\]/gi,
     /([0-9\.]+) (seconds|secs)/g,
-    / ... /g,
     /(▉|█|▋)+/g,
+    /\[[0-9]+\/[0-9]+\]/,
     // ip
     /([0-9\.]+).([0-9\.]+).([0-9\.]+).([0-9\.]+)/g,
     /[0-9]{1,2} ?%/g,
