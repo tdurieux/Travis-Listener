@@ -54,7 +54,7 @@ services:
       - back-tier
     links:
       - mongo
-    cpuset: "0"
+    cpu_count: 2
   mongo:
     image: mongo:latest
     ports:
@@ -73,6 +73,7 @@ services:
       timeout: 10s
       retries: 5
     cpu_count: 5
+    mem_limit: 10g
 volumes:
   db-data:
 
