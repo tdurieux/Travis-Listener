@@ -1,3 +1,38 @@
+header {
+    position: relative;
+    min-height: 25px;
+}
+.view {
+    width: 100%;
+    color: #ffffff;
+}
+
+.top-nav-collapse {
+    background: #4a507b !important;
+}
+
+.navbar {
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
+    font-weight: 300;
+    transition: background-color 0.5s ease;
+}
+.navbar .nav-link.nav-icon {
+    padding: 0 .5rem;
+}
+.navbar .nav-link .fa {
+    font-size: 30px;
+    line-height: 40px;
+}
+.navbar:not(.top-nav-collapse) {
+  background:  #4a507b !important;
+}
+
+@media (max-width: 991px) {
+  .navbar:not(.top-nav-collapse) {
+    background: #4a507b !important;
+  }
+}
+
 .chart {
     position: relative;
 }
