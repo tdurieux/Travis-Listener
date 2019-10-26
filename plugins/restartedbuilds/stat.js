@@ -112,6 +112,90 @@ async function getRepositories(buildsCollection) {
     return output;
 }
 
+async function getDayOfWeek(buildsCollection) {
+    const query = [
+        {
+            '$project': {
+                _id: '$_id',
+                dayOfWeek: { $dayOfWeek: "$new.started_at" },
+            }
+        },
+        {
+            '$group': {
+                '_id': '$dayOfWeek', 
+                'items': {
+                    '$addToSet': '$_id'
+                }
+            }
+        }, {
+            '$unwind': {
+                'path': '$items', 
+                'preserveNullAndEmptyArrays': false
+            }
+            }, {
+            '$group': {
+                '_id': '$_id', 
+                'countItem': {
+                    '$sum': 1
+                }
+            }
+        }, {
+            '$sort': {
+                'countItem': -1
+            }
+        }
+    ]
+
+    const result = await buildsCollection.aggregate(query).toArray()
+    const output = {}
+    for (let r of result) {
+        output[r._id] = r.countItem;
+    }
+    return output;
+}
+
+async function getHours(buildsCollection) {
+    const query = [
+        {
+            '$project': {
+                _id: '$_id',
+                hours: { $hour: "$new.started_at" },
+            }
+        },
+        {
+            '$group': {
+                '_id': '$hours', 
+                'items': {
+                    '$addToSet': '$_id'
+                }
+            }
+        }, {
+            '$unwind': {
+                'path': '$items', 
+                'preserveNullAndEmptyArrays': false
+            }
+            }, {
+            '$group': {
+                '_id': '$_id', 
+                'countItem': {
+                    '$sum': 1
+                }
+            }
+        }, {
+            '$sort': {
+                'countItem': -1
+            }
+        }
+    ]
+
+    const result = await buildsCollection.aggregate(query).toArray()
+    const output = {}
+    for (let r of result) {
+        output[r._id] = r.countItem;
+    }
+    return output;
+}
+
 async function getEventType(buildsCollection) {
     const query = [
         {
@@ -172,6 +256,12 @@ module.exports.stat = async function (buildsCollection, jobsCollection) {
 
     promises.push(getCount(jobsCollection))
     labels.push('nb_restarted_jobs')
+
+    promises.push(getDayOfWeek(buildsCollection))
+    labels.push('dayOfWeek')
+
+    promises.push(getHours(buildsCollection))
+    labels.push('hours')
 
     const results = await Promise.all(promises);
     const output = {};

@@ -6,8 +6,6 @@
         <link rel="stylesheet" href="/css/font-awesome.min.css">
 
         <title>Restarted Builds</title>
-        <link rel="stylesheet" href="/css/chartist.min.css">
-        <link rel="stylesheet" href="/css/chartist-plugin-tooltip.css">
         <link rel="stylesheet" href="/r/restartedbuilds/css/style.css">
     </head>
     <body>
@@ -36,35 +34,42 @@
         <!-- Main navigation -->
         <!--Main Layout-->
         <main>
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                            <div class="col p-4 d-flex flex-column position-static">
-                                <h3 class="mb-auto text-center"><span id='restarted_builds_nb'></span> Restarted Builds</h3>
+                    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                        <div class="sidebar-sticky">
+                            <div class="nav flex-column">
+                                <div class="list-group" id="restarted_builds" role="tablist">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                            <div class="col p-4 d-flex flex-column position-static">
-                                <h3 class="mb-auto text-center"><span id='restarted_jobs_nb'></span> Restarted Jobs</h3>
+                    </nav>
+                    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <h3 class="mb-auto text-center"><span id='restarted_builds_nb'></span> Restarted Builds</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <h3 class="mb-auto text-center"><span id='restarted_jobs_nb'></span> Restarted Jobs</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="tab-content" id="restarted_builds_details">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                            <div class="col p-4 d-flex flex-column position-static">
-                                <h3 class="mb-auto text-center"><span id='restarted_project_nb'></span> Restarted Project</h3>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-12 states_chart"></div>
-                    <div class="col-md-12 langs_chart"></div>
-                    <div class="col-md-12 events_chart"></div>
-                    <div class="col-md-12 days_chart"></div>
-                    <div class="col-md-12 hours_chart"></div>
+                    </main>
                 </div>
             </div>
         </main>
@@ -73,9 +78,7 @@
         <script src="/js/popper.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
 
-        <script src="/js/chartist.min.js"></script>
-        <script src="/js/chartist-plugin-tooltip.js"></script>
-        <script src="/r/restartedbuilds/js/dashboard.js"></script>
+        <script src="/r/restartedbuilds/js/explorer.js"></script>
 
         <script>
             if ($(document).scrollTop() < 35) {

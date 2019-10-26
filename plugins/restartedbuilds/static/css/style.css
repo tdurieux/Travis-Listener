@@ -119,11 +119,6 @@ header {
   }
 }
 
-.rgba-gradient {
-  background: -moz-linear-gradient(45deg, rgba(51, 51, 51, 0.82), rgba(13, 17, 198, 0.69) 100%);
-  background: -webkit-linear-gradient(45deg, rgba(51, 51, 51, 0.82), rgba(13, 17, 198, 0.69) 100%);
-  background: linear-gradient(to 45deg, rgba(51, 51, 51, 0.82), rgba(13, 17, 198, 0.69) 100%);
-}
 a:hover {
     text-decoration: none;
 }
@@ -167,7 +162,21 @@ a.white_border, a.white_border:hover, a.black_border, a.black_border:hover {
 .active .add_form {
     display: block;
 }
+main .container {
+  margin-top: 40px 
+}
+
 .main {
     width: 80%;
     margin: auto;
+}
+
+.ct-series .failed {
+  stroke: red;
+}
+.ct-series .errored {
+  stroke: grey;
+}
+.ct-series .passed {
+  stroke: green;
 }
