@@ -1,4 +1,4 @@
-const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const days = [null,'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
 $.get('api/stat', function (data, res) {
     console.log(data)
@@ -24,7 +24,7 @@ $.get('api/stat', function (data, res) {
         series.push(line)
     }
     initChart('.states_chart', 'Bar', labels, series);
-    initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)], [[...Object.values(data.languages)]]);
+    initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), [[...Object.values(data.languages)].splice(0, 15)]);
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], [[...Object.values(data.events)]]);
     initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v]), [[...Object.values(data.dayOfWeek)]]);
     initChart('.hours_chart', 'Bar', [...Object.keys(data.hours)].map(v => v + 'h'), [[...Object.values(data.hours)]]);
@@ -73,3 +73,31 @@ function initChart(query, type, labels, series) {
         }
     });
 }
+
+function getCurrentTask() {
+    $.get('api/tasks', data => {
+        for (let type in data) {
+            const index = data[type].data.index 
+            const total = data[type].data.total
+            console.log(data[type])
+            if (!data[type].lastFinishedAt) {
+                $("#" + type + "-fetch").hide()
+                $("#" + type + "-progress").parent().show()
+                $("#" + type + "-progress").css({'width': index*100/total + '%'})
+                $("#" + type + "-progress").text(index + '/' + total)
+            } else {
+                $("#" + type + "-fetch").show()
+                $("#" + type + "-progress").parent().hide();
+            }
+        }
+        console.log()
+    })
+}
+getCurrentTask();
+setInterval(getCurrentTask, 1000)
+
+$('.fetch').on('click', e => {
+    $.get('api/' + e.target.id.replace('-', 's/'), d => {
+        getCurrentTask();
+    })
+})

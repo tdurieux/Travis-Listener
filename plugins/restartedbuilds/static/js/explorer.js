@@ -26,6 +26,8 @@ $.get('/r/restartedbuilds/api/builds').then(builds => {
         const id = e.target.getAttribute('data-job-id')
         $.get('/r/restartedbuilds/api/job/diff/' + id).then(log => {
             $("#" + e.target.id.replace('-list', '')).html('<pre>' + log + '</pre>')
+        }, error => {
+            $("#" + e.target.id.replace('-list', '')).html('Not found: ' + JSON.stringify(error))
         })
     })
 })

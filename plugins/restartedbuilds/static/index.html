@@ -26,6 +26,12 @@
                         <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="index.html">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="explorer.html">Explore</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link nav-icon" href="https://github.com/tdurieux/builds-awareness/" data-offset="30"><i class="fa fa-github" aria-hidden="true"></i></a>
                     </li>
                     </ul>
@@ -38,6 +44,28 @@
         <main>
             <div class="container">
                 <div class="row">
+                    <div class="col-md-6">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <button id="build-fetch" type="button" class="btn btn-info fetch">Collect Restarted Build</button>
+
+                                <div class="progress" style="display: none;">
+                                    <div id="build-progress" class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <button id="job-fetch" type="button" class="btn btn-info fetch">Collect Restarted Job</button>
+
+                                <div class="progress" style="display: none;">
+                                    <div id="job-progress" class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
                             <div class="col p-4 d-flex flex-column position-static">
