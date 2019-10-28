@@ -4,7 +4,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     const buildsCollection = restartedDB.collection('builds')
     async function getBuildsFromIds(buildIds) {
         return new Promise((resolve, reject) => {
-            request.get('http://listener/api/builds?id=' + buildIds.join(','), function (err, res, body) {
+            request.get('http://listener/api/builds?id=' + buildIds.join(','), {timeout: 15000}, function (err, res, body) {
                 if (err) {
                     return reject(err);
                 }
@@ -35,7 +35,13 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
             buildObj[build.id] = build
         }
-        const newBuilds = await getBuildsFromIds(Object.keys(buildObj));
+        let newBuilds = []
+        try {
+            newBuilds = await getBuildsFromIds(Object.keys(buildObj));
+        } catch (e) {
+            console.log(e)
+            newBuilds = await getBuildsFromIds(Object.keys(buildObj));
+        }
         for (let build of newBuilds) {
             delete build.commit;
             
@@ -55,15 +61,22 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const maxRequest = 250
 
         let currentRequest = []
-        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}]}]}).sort( { _id: -1 } );
+        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}, {state: 'canceled'}, {state: 'passed'}]}]}).sort( { _id: -1 } );
         const nbBuild = await cursor.count()
         let count = 0
+        let countRestarted = 0
         while ((build = await cursor.next())) {
+            count++;
+            const current = await buildsCollection.findOne({id: build.id});
+            if (current != null) {
+                continue;
+            }
             currentRequest.push(build)
             if (currentRequest.length >= maxRequest) {
                 const newBuilds = await getNewBuild(currentRequest);
                 await job.touch();
                 if (newBuilds.length > 0) {
+                    countRestarted += newBuilds.length
                     try {
                         await buildsCollection.insertMany(newBuilds)
                         await job.touch();
@@ -71,16 +84,17 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                         // ignore
                         console.error(error)
                     }
-                    job.attrs.data = {index: count, total: nbBuild}
+                    job.attrs.data = {index: count, total: nbBuild, countRestarted}
                     await job.save();
                 }
                 currentRequest = []
             }
-            count++;
         }
         if (currentRequest.length > 0) {
             const newBuilds = await getNewBuild(currentRequest);
             if (newBuilds.length > 0) {
+                countRestarted += newBuilds.length
+                console.log('Restarted builds:', countRestarted)
                 try {
                     await buildsCollection.insertMany(newBuilds)
                     await job.touch();
@@ -90,7 +104,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: nbBuild}
+        job.attrs.data = {index: count, total: nbBuild, countRestarted}
         await job.save();
     });
 };

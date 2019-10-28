@@ -1,5 +1,4 @@
 const request = require('request')
-const stripAnsi = require('strip-ansi');
 
 module.exports = function(agenda, restartedDB, buildsaverDB) {
     const buildsCollection = restartedDB.collection('builds')
@@ -40,7 +39,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
     async function getJobsFromIds(buildIds) {
         return new Promise((resolve, reject) => {
-            request.get('http://listener/api/jobs?id=' + buildIds.join(','), function (err, res, body) {
+            request.get('http://listener/api/jobs?id=' + buildIds.join(','), {timeout: 15000}, function (err, res, body) {
                 if (err) {
                     return reject(err);
                 }
@@ -71,7 +70,12 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 delete job.config['.result'];
             }
         }
-        const newJobs = await getJobsFromIds(Object.keys(jobObj));
+        let newJobs = []
+        try {
+            newJobs = await getJobsFromIds(Object.keys(jobObj));    
+        } catch (error) {
+            newJobs = await getJobsFromIds(Object.keys(jobObj));
+        }
         for (let job of newJobs) {
             delete job.commit;
             
@@ -110,11 +114,11 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const nbBuilds = await cursor.count()
 
         let count = 0
-
+        let countRestarted = 0
         const checked = new Set()
         
         while ((build = await cursor.next())) {
-            console.log("Build", build.id)
+            count++;
             if (checked.has(build.id)) {
                 continue
             }
@@ -129,28 +133,26 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
                 if (currentJobsID.length >= 200) {
                     const savedJobs = await jobsBuildsaverCollection.find({$or: currentJobsID.map(id => {return {id: id}})}).toArray()
-
-                    const newJobs = await getNewJobs(savedJobs);
-                    if (newJobs.length > 0) {
-                        try {
+                    try {
+                        const newJobs = await getNewJobs(savedJobs);
+                        if (newJobs.length > 0) {
+                            countRestarted += newJobs.length
+                            console.log('Restarted jobs:', countRestarted)
                             await jobsCollection.insertMany(newJobs)
                             for (let job of newJobs) {
-                                console.log("save log", job.id)
                                 await saveLog(job.id)
-                                console.log("end save log", job.id)
                             }
-                            job.attrs.data = {index: count, total: nbBuilds}
+                            job.attrs.data = {index: count, total: nbBuilds, countRestarted}
                             await job.save();
-                        } catch (error) {
-                            // ignore
-                            console.error(error)
                         }
+                    } catch (error) {
+                        // ignore
+                        console.error(error)
                     }
                     currentJobsID = []
                 }
             }
-            count++;
-            job.attrs.data = {index: count, total: nbBuilds}
+            job.attrs.data = {index: count, total: nbBuilds, countRestarted}
             await job.save();
         }
         
@@ -159,6 +161,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
             const newJobs = await getNewJobs(savedJobs);
             if (newJobs.length > 0) {
+                countRestarted += newJobs.length
                 try {
                     await jobsCollection.insertMany(newJobs)
                 } catch (error) {
@@ -170,7 +173,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: nbBuilds}
+        job.attrs.data = {index: count, total: nbBuilds, countRestarted}
         await job.save();
     });
 };

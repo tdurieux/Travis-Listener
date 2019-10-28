@@ -1,4 +1,4 @@
-const days = [null,'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const days = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 $.get('api/stat', function (data, res) {
     console.log(data)
@@ -24,12 +24,25 @@ $.get('api/stat', function (data, res) {
         series.push(line)
     }
     initChart('.states_chart', 'Bar', labels, series);
-    initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), [[...Object.values(data.languages)].splice(0, 15)]);
-    initChart('.events_chart', 'Bar', [...Object.keys(data.events)], [[...Object.values(data.events)]]);
-    initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v]), [[...Object.values(data.dayOfWeek)]]);
-    initChart('.hours_chart', 'Bar', [...Object.keys(data.hours)].map(v => v + 'h'), [[...Object.values(data.hours)]]);
+    initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
+    initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
+    initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v - 1]), getSeries(data.dayOfWeek));
+    initChart('.hours_chart', 'Line', [...Object.keys(data.hours)].map(v => v + 'h'), getSeries(data.hours));
 })
 
+function getSeries(obj, max) {
+    const output = [];
+    for (let key in obj) {
+        output.push({meta: key, value: obj[key]})
+        if (max != null) {
+            max--;
+            if (max == 0) {
+                break;
+            }
+        }
+    }
+    return [output];
+}
 function initChart(query, type, labels, series) {
     new Chartist[type](query, {
         labels,
@@ -37,16 +50,39 @@ function initChart(query, type, labels, series) {
     }, {
         height: 300,
         stackBars: true,
-        // fullWidth: true,
+        fullWidth: true,
+        axisX: {
+            showGrid: false,
+            labelInterpolationFnc: function(value) {
+              return value[0];
+            }
+        },
         plugins: [
             Chartist.plugins.tooltip({
-                appendToBody: true
+                appendToBody: false
             })
         ]
-    }).on('draw', function(data) {
+    }, [
+        // Over 300px, we change the bar distance and show the first three letters of the weekdays
+        ['screen and (min-width: 300px)', {
+          seriesBarDistance: 15,
+          axisX: {
+            labelInterpolationFnc: function(value) {
+              return value.slice(0, 3);
+            }
+          }
+        }],
+        // Over 600px, we increase the bar distance one more time and show the full weekdays
+        ['screen and (min-width: 600px)', {
+          seriesBarDistance: 30,
+          axisX: {
+            labelInterpolationFnc: function(value) { return value; }
+          }
+        }]
+      ]).on('draw', function(data) {
         if(data.type === 'bar') {
             data.element.attr({
-                style: 'stroke-width: ' + 100 / series[0].length + '%',
+                style: 'stroke-width: calc(' + (100 / series[0].length) + '% - 5px)',
                 class: data.series[data.index].className + ' ' + data.element.attr('class')
             });
 
@@ -69,7 +105,7 @@ function initChart(query, type, labels, series) {
                     to: 1,
                     easing: Chartist.Svg.Easing.easeOutQuint
                 }
-              });
+            });
         }
     });
 }
@@ -79,8 +115,10 @@ function getCurrentTask() {
         for (let type in data) {
             const index = data[type].data.index 
             const total = data[type].data.total
-            console.log(data[type])
-            if (!data[type].lastFinishedAt) {
+
+            const isFinished = (data[type].lockedAt == null && data[type].lastRunAt != null) || data[type].failedAt
+
+            if (!isFinished) {
                 $("#" + type + "-fetch").hide()
                 $("#" + type + "-progress").parent().show()
                 $("#" + type + "-progress").css({'width': index*100/total + '%'})

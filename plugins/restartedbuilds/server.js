@@ -6,7 +6,9 @@ const Agenda = require('agenda');
 const stat = require('./stat').stat
 
 const cleanLog = require('./clean_log').cleanLog
-const diff = require('diff');
+const diff_match_patch = require("diff-match-patch");
+require('diff-match-patch-line-and-word')
+const dmp = new diff_match_patch();
 
 var port = process.env.PORT || 4000;
 const mongoURL = "mongodb://mongo:27017";
@@ -58,6 +60,7 @@ server.listen(port, function () {
         } else {
             const lastJob = lastJobs[0]
             if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
+                lastJob.attrs.data.index = 0
                 res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
@@ -73,6 +76,7 @@ server.listen(port, function () {
         } else {
             const lastJob = lastJobs[0]
             if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
+                lastJob.attrs.data.index = 0
                 res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
@@ -131,12 +135,22 @@ server.listen(port, function () {
         }
         const newLog = cleanLog(newResult.log)
         const oldLog = cleanLog(oldResult.log)
-        const lines = diff.createPatch('log',oldLog,newLog).split('\n')
+        const diffs = dmp.diff_lineMode(oldLog, newLog);
+        const lines = []
+        for (let diff of diffs) {
+            let op = ' ';
+            if (diff[0] == -1) {
+                op = '-'
+            } else if (diff[0] == 1) {
+                op = '+'
+            }
+            const ll = diff[1].split('\n')
+            for (let l of ll) {
+                lines.push(op + l)
+            }
+        }
         const output = []
         for (let line of lines) {
-            if (line == '--- log') {
-                continue
-            }
             if (line[0] != '-') {
                 continue
             }

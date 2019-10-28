@@ -13,6 +13,8 @@
     "async": "^3.1.0",
     "compression": "^1.7.4",
     "diff": "^4.0.1",
+    "diff-match-patch": "^1.0.4",
+    "diff-match-patch-line-and-word": "^0.1.2",
     "express": "^4.17.1",
     "method-override": "^3.0.0",
     "mongodb": "^3.3.2",
