@@ -56,7 +56,7 @@ server.listen(port, function () {
         } else {
             const lastJob = lastJobs[0]
             if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
-                res.json({status: 'ok', job: await agenda.now(taskName, lastJob.attrs.data)});
+                res.json({status: 'ok', job: await agenda.now(taskName)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
             }
@@ -149,7 +149,7 @@ server.listen(port, function () {
     })
 
     app.get('/api/stat/', async function (req, res) {
-        const results = await stat(buildsCollection, jobsCollection)
+        const results = await stat(buildsCollection, jobsCollection, logCollection, buildsaver_db.collection('builds'))
         res.json(results);
     })
 })()

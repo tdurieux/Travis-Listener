@@ -44,7 +44,7 @@
         <main>
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
                             <div class="col p-4 d-flex flex-column position-static">
                                 <button id="build-fetch" type="button" class="btn btn-info fetch">Collect Restarted Build</button>
@@ -55,13 +55,24 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
                             <div class="col p-4 d-flex flex-column position-static">
                                 <button id="job-fetch" type="button" class="btn btn-info fetch">Collect Restarted Job</button>
 
                                 <div class="progress" style="display: none;">
                                     <div id="job-progress" class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <button id="lastJobAnalysis-fetch" type="button" class="btn btn-info analyze">Analyze Job</button>
+
+                                <div class="progress" style="display: none;">
+                                    <div id="lastJobAnalysis-progress" class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
@@ -88,9 +99,11 @@
                         </div>
                     </div>
                     
+                    <div class="col-md-12 errors_chart"></div>
                     <div class="col-md-12 states_chart"></div>
                     <div class="col-md-12 langs_chart"></div>
                     <div class="col-md-12 events_chart"></div>
+                    <div class="col-md-12 date_chart"></div>
                     <div class="col-md-12 days_chart"></div>
                     <div class="col-md-12 hours_chart"></div>
                 </div>

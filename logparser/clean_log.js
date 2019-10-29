@@ -26,7 +26,8 @@ module.exports.startWith = [
     'remote:',
     '/home/travis/',
     '...',
-    '###'
+    '###',
+    'Progress'
 ]
 const toRemove = [
     // date

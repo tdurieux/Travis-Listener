@@ -6,18 +6,6 @@ async function getChangedState(buildsCollection) {
                     'old': '$old.state', 
                     'new': '$new.state'
                 }, 
-                'items': {
-                    '$addToSet': '$id'
-                }
-            }
-        }, {
-            '$unwind': {
-                'path': '$items', 
-                'preserveNullAndEmptyArrays': false
-            }
-            }, {
-            '$group': {
-                '_id': '$_id', 
                 'countItem': {
                     '$sum': 1
                 }
@@ -45,18 +33,6 @@ async function getChangedLanguages(buildsCollection) {
         {
             '$group': {
                 '_id': '$old.language', 
-                'items': {
-                    '$addToSet': '$id'
-                }
-            }
-        }, {
-            '$unwind': {
-                'path': '$items', 
-                'preserveNullAndEmptyArrays': false
-            }
-            }, {
-            '$group': {
-                '_id': '$_id', 
                 'countItem': {
                     '$sum': 1
                 }
@@ -123,18 +99,6 @@ async function getDayOfWeek(buildsCollection) {
         {
             '$group': {
                 '_id': '$dayOfWeek', 
-                'items': {
-                    '$addToSet': '$_id'
-                }
-            }
-        }, {
-            '$unwind': {
-                'path': '$items', 
-                'preserveNullAndEmptyArrays': false
-            }
-            }, {
-            '$group': {
-                '_id': '$_id', 
                 'countItem': {
                     '$sum': 1
                 }
@@ -165,18 +129,36 @@ async function getHours(buildsCollection) {
         {
             '$group': {
                 '_id': '$hours', 
-                'items': {
-                    '$addToSet': '$_id'
+                'countItem': {
+                    '$sum': 1
                 }
             }
         }, {
-            '$unwind': {
-                'path': '$items', 
-                'preserveNullAndEmptyArrays': false
+            '$sort': {
+                'countItem': -1
             }
-            }, {
+        }
+    ]
+
+    const result = await buildsCollection.aggregate(query).toArray()
+    const output = {}
+    for (let r of result) {
+        output[r._id] = r.countItem;
+    }
+    return output;
+}
+
+async function perDay(buildsCollection, dateField) {
+    dateField = dateField || "$new.started_at";
+    const query = [
+        {
+            '$project': {
+                yearMonthDay: { $dateToString: { format: "%Y-%m-%d", date: dateField } }
+            }
+        },
+        {
             '$group': {
-                '_id': '$_id', 
+                '_id': '$yearMonthDay', 
                 'countItem': {
                     '$sum': 1
                 }
@@ -201,18 +183,75 @@ async function getEventType(buildsCollection) {
         {
             '$group': {
                 '_id': '$old.event_type', 
-                'items': {
-                    '$addToSet': '$id'
+                'countItem': {
+                    '$sum': 1
                 }
             }
         }, {
-            '$unwind': {
-                'path': '$items', 
-                'preserveNullAndEmptyArrays': false
+            '$sort': {
+                'countItem': -1
             }
-            }, {
+        }
+    ]
+
+    const result = await buildsCollection.aggregate(query).toArray()
+    const output = {}
+    for (let r of result) {
+        output[r._id] = r.countItem;
+    }
+    return output;
+}
+
+async function getErrorTypes(collection) {
+    const query = [
+        {
+          '$match': {
+            'analysis.original.errors.0': {
+              '$exists': 1
+            }
+          }
+        }, {
+          '$unwind': {
+            'path': '$analysis.original.errors', 
+            'preserveNullAndEmptyArrays': false
+          }
+        }, {
+          '$group': {
+            '_id': {
+              'id': '$id', 
+              'type': '$analysis.original.errors.type'
+            }, 
+            'count': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$group': {
+            '_id': '$_id.type', 
+            'countItem': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$sort': {
+            'countItem': -1
+          }
+        }
+      ]
+
+    const result = await collection.aggregate(query).toArray()
+    const output = {}
+    for (let r of result) {
+        output[r._id] = r.countItem;
+    }
+    return output;
+}
+
+async function isPullRequest(buildsCollection) {
+    const query = [
+        {
             '$group': {
-                '_id': '$_id', 
+                '_id': '$old.pull_request', 
                 'countItem': {
                     '$sum': 1
                 }
@@ -236,7 +275,7 @@ async function getCount(collection) {
     return await collection.count()
 }
 
-module.exports.stat = async function (buildsCollection, jobsCollection) {
+module.exports.stat = async function (buildsCollection, jobsCollection, logsCollection, originalBuildsCollection) {
     const labels = []
     const promises = []
     promises.push(getChangedState(buildsCollection))
@@ -251,17 +290,32 @@ module.exports.stat = async function (buildsCollection, jobsCollection) {
     promises.push(getEventType(buildsCollection))
     labels.push('events')
 
+    promises.push(isPullRequest(buildsCollection))
+    labels.push('prs')
+
     promises.push(getCount(buildsCollection))
     labels.push('nb_restarted_builds')
 
     promises.push(getCount(jobsCollection))
     labels.push('nb_restarted_jobs')
 
+    promises.push(perDay(buildsCollection))
+    labels.push('perDay')
+
+    promises.push(perDay(buildsCollection, "$old.started_at"))
+    labels.push('restartedPerDay')
+
+    promises.push(perDay(originalBuildsCollection, "$started_at"))
+    labels.push('originalPerDay')
+
     promises.push(getDayOfWeek(buildsCollection))
     labels.push('dayOfWeek')
 
     promises.push(getHours(buildsCollection))
     labels.push('hours')
+
+    promises.push(getErrorTypes(logsCollection))
+    labels.push('errorTypes')
 
     const results = await Promise.all(promises);
     const output = {};

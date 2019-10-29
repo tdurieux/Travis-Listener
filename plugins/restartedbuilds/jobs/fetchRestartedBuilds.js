@@ -4,7 +4,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     const buildsCollection = restartedDB.collection('builds')
     async function getBuildsFromIds(buildIds) {
         return new Promise((resolve, reject) => {
-            request.get('http://listener/api/builds?id=' + buildIds.join(','), {timeout: 15000}, function (err, res, body) {
+            request.get('http://listener/api/builds?id=' + buildIds.join(','), {timeout: 20000}, function (err, res, body) {
                 if (err) {
                     return reject(err);
                 }
@@ -39,7 +39,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         try {
             newBuilds = await getBuildsFromIds(Object.keys(buildObj));
         } catch (e) {
-            console.log(e)
+            console.error("Unable to get get builds", e)
             newBuilds = await getBuildsFromIds(Object.keys(buildObj));
         }
         for (let build of newBuilds) {
@@ -61,10 +61,14 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const maxRequest = 250
 
         let currentRequest = []
-        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}, {state: 'canceled'}, {state: 'passed'}]}]}).sort( { _id: -1 } );
+        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-30))}}, {$or: [{state: 'errored'}, {state: 'failed'}, {state: 'canceled'}, {state: 'passed'}]}]}).sort( { _id: 1 } );
         const nbBuild = await cursor.count()
         let count = 0
         let countRestarted = 0
+
+        job.attrs.progression = {index: count, total: nbBuild, countRestarted}
+        await job.save();
+
         while ((build = await cursor.next())) {
             count++;
             const current = await buildsCollection.findOne({id: build.id});
@@ -84,10 +88,10 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                         // ignore
                         console.error(error)
                     }
-                    job.attrs.data = {index: count, total: nbBuild, countRestarted}
-                    await job.save();
                 }
                 currentRequest = []
+                job.attrs.progression = {index: count, total: nbBuild, countRestarted}
+                await job.save();
             }
         }
         if (currentRequest.length > 0) {
@@ -104,7 +108,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: nbBuild, countRestarted}
+        job.attrs.progression = {index: count, total: nbBuild, countRestarted}
         await job.save();
     });
 };

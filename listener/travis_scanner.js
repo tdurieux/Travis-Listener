@@ -99,6 +99,7 @@ async function getItems(func, query) {
             for(let i in items) {
                 items[i].commit = commits[i];
                 items[i] = cleanGitHubObj(items[i]);
+                items[i].branch = items[i].commit.branch;
             }
             return resolve(items);
         });

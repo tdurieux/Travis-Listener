@@ -202,7 +202,8 @@ async function connect (err) {
                 if (commit.committed_at) {
                     commit.committed_at = new Date(commit.committed_at)
                 }
-                data.data.commit = commit.sha;
+                data.data.branch = commit.branch;
+                delete data.data.commit;
                 
                 commitsCollection.findOne({"sha": commit.sha}, function (err, result) {
                     if (!err && !result) {
@@ -236,7 +237,7 @@ async function connect (err) {
             }
             if (data.event == 'job') {
                 const job = data.data
-                if (job.state == "failed" || job.state == "errored") {
+                if (job.state == "failed" || job.state == "errored"  || job.state == "canceled") {
                     saveLog(job.id);
                 }
                 jobsCollection.insertOne(job, (err, result) => {
@@ -252,7 +253,7 @@ async function connect (err) {
             }
             if (data.event == 'job_updated') {
                 const job = data.data
-                if (job.state == "failed" || job.state == "errored") {
+                if (job.state == "failed" || job.state == "errored"  || job.state == "canceled") {
                     saveLog(job.id);
                 }
                 jobsCollection.updateOne({id: job.id}, {$set: job}, {upsert: true})

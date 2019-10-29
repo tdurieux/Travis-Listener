@@ -23,9 +23,11 @@ $.get('api/stat', function (data, res) {
         }
         series.push(line)
     }
+    initChart('.errors_chart', 'Bar', [...Object.keys(data.errorTypes)], getSeries(data.errorTypes));
     initChart('.states_chart', 'Bar', labels, series);
     initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
+    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)].map(v => days[v - 1]), getSeries(data.restartedPerDay));
     initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v - 1]), getSeries(data.dayOfWeek));
     initChart('.hours_chart', 'Line', [...Object.keys(data.hours)].map(v => v + 'h'), getSeries(data.hours));
 })
@@ -113,15 +115,17 @@ function initChart(query, type, labels, series) {
 function getCurrentTask() {
     $.get('api/tasks', data => {
         for (let type in data) {
-            const index = data[type].data.index 
-            const total = data[type].data.total
+            const index = (data[type].progression || {}).index || 0
+            const total = (data[type].progression || {}).total || 0
 
             const isFinished = (data[type].lockedAt == null && data[type].lastRunAt != null) || data[type].failedAt
 
             if (!isFinished) {
+                const percent = Math.max(10, index*100/total)
+
                 $("#" + type + "-fetch").hide()
                 $("#" + type + "-progress").parent().show()
-                $("#" + type + "-progress").css({'width': index*100/total + '%'})
+                $("#" + type + "-progress").css({'width': percent + '%'})
                 $("#" + type + "-progress").text(index + '/' + total)
             } else {
                 $("#" + type + "-fetch").show()
@@ -139,3 +143,9 @@ $('.fetch').on('click', e => {
         getCurrentTask();
     })
 })
+$('.analyze').on('click', e => {
+    $.get('api/jobs/analyze', d => {
+        getCurrentTask();
+    })
+})
+

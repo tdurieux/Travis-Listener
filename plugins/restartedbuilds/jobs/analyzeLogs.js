@@ -7,7 +7,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
 
     agenda.define('analyze jobs', {concurrency: 1}, async job => {
-        const cursor = logCollection.find({}).sort({_id: -1});
+        const cursor = logCollection.find({'analysis': {$exists: 0}}).sort({_id: -1});
 
         const nbLogs = await cursor.count()
         let count = 0
@@ -36,7 +36,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
 
             checked.add(restartedLog.id)
-            job.attrs.data = {index: count, total: nbLogs}
+            job.attrs.progression = {index: count, total: nbLogs}
             await job.save();
         }
     });

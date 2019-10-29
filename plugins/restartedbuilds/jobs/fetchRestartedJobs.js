@@ -142,7 +142,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             for (let job of newJobs) {
                                 await saveLog(job.id)
                             }
-                            job.attrs.data = {index: count, total: nbBuilds, countRestarted}
+                            job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
                             await job.save();
                         }
                     } catch (error) {
@@ -152,7 +152,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     currentJobsID = []
                 }
             }
-            job.attrs.data = {index: count, total: nbBuilds, countRestarted}
+            job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
             await job.save();
         }
         
@@ -173,7 +173,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
             }
         }
-        job.attrs.data = {index: count, total: nbBuilds, countRestarted}
+        job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
         await job.save();
     });
 };
