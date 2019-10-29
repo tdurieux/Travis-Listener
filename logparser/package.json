@@ -9,9 +9,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "async": "^3.1.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
+    "diff-match-patch": "^1.0.4",
+    "diff-match-patch-line-and-word": "^0.1.2",
     "express": "^4.17.1",
-    "method-override": "^3.0.0"
+    "method-override": "^3.0.0",
+    "strip-ansi": "^5.2.0"
   }
 }

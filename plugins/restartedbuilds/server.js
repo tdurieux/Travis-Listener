@@ -2,13 +2,9 @@ const express = require('express')
 const compression = require('compression')
 const MongoClient = require('mongodb').MongoClient;
 const Agenda = require('agenda');
+const request = require('request');
 
 const stat = require('./stat').stat
-
-const cleanLog = require('./clean_log').cleanLog
-const diff_match_patch = require("diff-match-patch");
-require('diff-match-patch-line-and-word')
-const dmp = new diff_match_patch();
 
 var port = process.env.PORT || 4000;
 const mongoURL = "mongodb://mongo:27017";
@@ -48,48 +44,47 @@ server.listen(port, function () {
 
     require('./jobs/fetchRestartedBuilds')(agenda, db, buildsaver_db);
     require('./jobs/fetchRestartedJobs')(agenda, db, buildsaver_db);
+    require('./jobs/analyzeLogs')(agenda, db, buildsaver_db);
     agenda.start();
 
     console.log("Restarted Service initialized");
     
-    app.get("/api/builds/fetch", async function (req, res) {
-        const TASK_NAME = 'fetch restarted builds'
-        const lastJobs = await agenda.jobs({name: TASK_NAME}, {_id: -1}, 1);
+    async function startTask(taskName, res) {
+        const lastJobs = await agenda.jobs({name: taskName}, {_id: -1}, 1);
         if (lastJobs.length == 0) {
-            res.json({status: 'ok', job: await agenda.now(TASK_NAME)});
+            res.json({status: 'ok', job: await agenda.now(taskName)});
         } else {
             const lastJob = lastJobs[0]
             if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
-                lastJob.attrs.data.index = 0
-                res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
+                res.json({status: 'ok', job: await agenda.now(taskName, lastJob.attrs.data)});
             } else {
                 res.json({status: 'still_running', job: lastJob});
             }
         }
+    }
+    app.get("/api/builds/fetch", async function (req, res) {
+        const TASK_NAME = 'fetch restarted builds'
+        startTask(TASK_NAME, res)
     });
+
+    app.get("/api/jobs/analyze", async (req, res) => {
+        const TASK_NAME = 'analyze jobs'
+        startTask(TASK_NAME, res)
+    })
 
     app.get("/api/jobs/fetch", async function (req, res) {
         const TASK_NAME = 'fetch restarted jobs'
-        const lastJobs = await agenda.jobs({name: TASK_NAME}, {_id: -1}, 1);
-        if (lastJobs.length == 0) {
-            res.json({status: 'ok', job: await agenda.now(TASK_NAME)});
-        } else {
-            const lastJob = lastJobs[0]
-            if ((lastJob.attrs.lockedAt == null && lastJob.attrs.lastRunAt != null) || lastJob.attrs.failedAt) {
-                lastJob.attrs.data.index = 0
-                res.json({status: 'ok', job: await agenda.now(TASK_NAME, lastJob.attrs.data)});
-            } else {
-                res.json({status: 'still_running', job: lastJob});
-            }
-        }
+        startTask(TASK_NAME, res)
     });
 
     app.get("/api/tasks", async function (req, res) {
         const lastBuilds = await agenda.jobs({name: 'fetch restarted builds'}, {_id: -1}, 1);
         const lastJobs = await agenda.jobs({name: 'fetch restarted jobs'}, {_id: -1}, 1);
+        const lastJobAnalysis = await agenda.jobs({name: 'analyze jobs'}, {_id: -1}, 1);
         res.json({
             build: lastBuilds[0],
             job: lastJobs[0],
+            lastJobAnalysis: lastJobAnalysis[0]
         });
     });
 
@@ -133,35 +128,14 @@ server.listen(port, function () {
         if (oldResult == null) {
             return res.status(404).send().end()
         }
-        const newLog = cleanLog(newResult.log)
-        const oldLog = cleanLog(oldResult.log)
-        const diffs = dmp.diff_lineMode(oldLog, newLog);
-        const lines = []
-        for (let diff of diffs) {
-            let op = ' ';
-            if (diff[0] == -1) {
-                op = '-'
-            } else if (diff[0] == 1) {
-                op = '+'
-            }
-            const ll = diff[1].split('\n')
-            for (let l of ll) {
-                lines.push(op + l)
-            }
-        }
-        const output = []
-        for (let line of lines) {
-            if (line[0] != '-') {
-                continue
-            }
-            if (lines.indexOf('+'+line.substring(1)) > -1) {
-                continue;
-            }
-            output.push(line.substring(1))
-        }
-        res.type('txt')
-        res.set('Cache-Control', 'public, max-age=2592000, s-maxage=2592000');
-        return res.send(output.join('\n')).end()
+        request.post('http://logparser/api/diff', {
+            timeout: 5000,
+            body: {new: newResult.log, old: oldResult.log},
+            json: true
+        }, function (err, t, body) {
+            // const result = JSON.parse(body);
+            return res.json(body)
+        });
     })
 
     app.get("/job/:id", async function (req, res) {
@@ -181,7 +155,7 @@ server.listen(port, function () {
 })()
 
 async function graceful() {
-    console.log('exit')
+    console.log('exit', arguments)
     await agenda.stop();
     await client.close();
     process.exit(0);

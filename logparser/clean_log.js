@@ -8,8 +8,9 @@ const properties = [
     /(travis-build version:).*/g,
     /(process ).*/g,
     // /(Get|Ign|Hit):\d+/g,
+    /(Err:)\d+/
 ]
-const startWith = [
+module.exports.startWith = [
     'Get',
     'Ign',
     'Hit',
@@ -24,7 +25,8 @@ const startWith = [
     'travis_fold',
     'remote:',
     '/home/travis/',
-    '...'
+    '...',
+    '###'
 ]
 const toRemove = [
     // date
@@ -68,22 +70,40 @@ function isEmpty(str) {
     }
     return false;
 }
-
 module.exports.cleanLog = function (log) {
-    const hrstart = process.hrtime()
+    log = stripAnsi(log).replace(/(?:\\[rn]|[\r\n])/g,'\n')
+    const output = []
+    const lines = log.split('\n')
+    line: for (let line of lines) {
+      for (let property of module.exports.startWith) {
+        if (line.indexOf(property) > -1) {
+          continue line;
+        }
+      }
+      if (line.indexOf('\b') != -1) {
+        const cs = []
+        for (let i=0 ; i < line.length -1; i++) {
+          if (line[i] == '\b') {
+            // remove the previous character
+            cs.pop();
+          } else {
+            cs.push(line[i])
+          }
+        }
+        line = cs.join('')
+      }
+      output.push(line)
+    }
+    return output.join('\n');
+}
 
+module.exports.normalizeLog = function (log) {
     const output = []
 
-    log = stripAnsi(log).replace(/(?:\\[rn]|[\r\n])/g,'\n')
     const lines = log.split('\n')
     line: for (let line of lines) {
         if(isEmpty(line)) {
             continue;
-        }
-        for (let property of startWith) {
-            if (line.indexOf(property) > -1) {
-                continue line;
-            }
         }
         for (let property of properties) {
             line = line.replace(property, '$1')
@@ -97,7 +117,5 @@ module.exports.cleanLog = function (log) {
         output.push(line)
     }
     const out = output.join('\n')
-    var hrend = process.hrtime(hrstart)
-    console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
     return out;
 }
