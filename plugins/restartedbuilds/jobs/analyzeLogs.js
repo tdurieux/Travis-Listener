@@ -3,11 +3,11 @@ const request = require('request')
 module.exports = function(agenda, restartedDB, buildsaverDB) {
     const logCollection = restartedDB.collection('logs')
 
-    const logBuildsaverCollection = buildsaverDB.collection('logs').sort({_id: -1})
+    const logBuildsaverCollection = buildsaverDB.collection('logs')
 
 
     agenda.define('analyze jobs', {concurrency: 1}, async job => {
-        const cursor = logCollection.find({});
+        const cursor = logCollection.find({}).sort({_id: -1});
 
         const nbLogs = await cursor.count()
         let count = 0
