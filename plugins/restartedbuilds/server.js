@@ -45,6 +45,7 @@ server.listen(port, function () {
     require('./jobs/fetchRestartedBuilds')(agenda, db, buildsaver_db);
     require('./jobs/fetchRestartedJobs')(agenda, db, buildsaver_db);
     require('./jobs/analyzeLogs')(agenda, db, buildsaver_db);
+    require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
     agenda.start();
 
     console.log("Restarted Service initialized");
@@ -62,6 +63,10 @@ server.listen(port, function () {
             }
         }
     }
+    app.get("/api/logs/reduce", async function (req, res) {
+        const TASK_NAME = 'reduceLogSize'
+        startTask(TASK_NAME, res)
+    });
     app.get("/api/builds/fetch", async function (req, res) {
         const TASK_NAME = 'fetch restarted builds'
         startTask(TASK_NAME, res)
