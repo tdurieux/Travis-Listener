@@ -92,6 +92,30 @@ server.listen(port, function () {
         const builds = await buildsCollection.find({ $where : "this.old.state != this.new.state"}).toArray();
         res.json(builds);
     });
+    app.get("/api/jobs", async function (req, res) {
+        const items = await jobsCollection.aggregate([
+            {
+              '$lookup': {
+                'from': 'logs', 
+                'localField': 'id', 
+                'foreignField': 'id', 
+                'as': 'log'
+              }
+            }, {
+              '$unwind': {
+                'path': '$log', 
+                'preserveNullAndEmptyArrays': false
+              }
+            }, {
+              '$match': {
+                'log.analysis.original.reasons.0': {
+                  '$exists': 0
+                }
+              }
+            }
+          ]).limit(100).toArray();
+        res.json(items);
+    });
 
     app.get("/api/build/:id", async function (req, res) {
         res.json(await buildsCollection.aggregate([
@@ -120,8 +144,8 @@ server.listen(port, function () {
 
     app.get("/api/job/diff/:id", async function (req, res) {
         const jobId = parseInt(req.params.id)
-        const newResult = await logCollection.findOne({"id": jobId})
-        if (newResult == null) {
+        const restartedLog = await logCollection.findOne({"id": jobId})
+        if (restartedLog == null) {
             return res.status(404).send().end()
         }
         const oldResult = await buildSaverLogCollection.findOne({"id": jobId})
@@ -130,11 +154,18 @@ server.listen(port, function () {
         }
         request.post('http://logparser/api/diff', {
             timeout: 5000,
-            body: {new: newResult.log, old: oldResult.log},
+            body: {new: restartedLog.log, old: oldResult.log},
             json: true
-        }, function (err, t, body) {
+        }, async function (err, t, output) {
             // const result = JSON.parse(body);
-            return res.json(body)
+            if (output != null) {
+                restartedLog.analysis = output.analysis;
+                restartedLog.logDiff = output.logDiff;
+
+                await logCollection.updateOne({id: restartedLog.id}, {$set: restartedLog}, {upsert: true})
+            }
+
+            return res.json(output)
         });
     })
 

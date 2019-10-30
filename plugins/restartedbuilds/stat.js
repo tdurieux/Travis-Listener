@@ -206,20 +206,20 @@ async function getErrorTypes(collection) {
     const query = [
         {
           '$match': {
-            'analysis.original.errors.0': {
+            'analysis.original.reasons.0': {
               '$exists': 1
             }
           }
         }, {
           '$unwind': {
-            'path': '$analysis.original.errors', 
+            'path': '$analysis.original.reasons', 
             'preserveNullAndEmptyArrays': false
           }
         }, {
           '$group': {
             '_id': {
               'id': '$id', 
-              'type': '$analysis.original.errors.type'
+              'type': '$analysis.original.reasons.type'
             }, 
             'count': {
               '$sum': 1

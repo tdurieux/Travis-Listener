@@ -49,53 +49,68 @@ async function parseLog(log) {
                             job.config = {};
                         }
                         job.config.language = line.replace("Build language: ", "");
-                    }
-                    if (line.indexOf("Done. Your build exited with ") != -1) {
+                    } else if (line.indexOf("Done. Your build exited with ") != -1) {
                         exitCode = parseInt(line.substring("Done. Your build exited with ".length, line.length -1));
-                    }
-
-                    if (line.indexOf("fatal: Could not read from remote repository.") != -1)  {
+                    } else if (line.indexOf("fatal: Could not read from remote repository.") != -1)  {
                         errors.push({
                             type: 'Unable to clone'
                         })
-                    }
-
-                    if (line.indexOf("Error: retrieving gpg key timed out.") != -1)  {
+                    } else if (result = line.match(/fatal: unable to access '(?<file>[^']+)'/)) {
+                        errors.push({
+                            category: 'credential',
+                            type: 'Unable to clone',
+                            library: result.groups.file
+                        })
+                    } else if (line.indexOf("Error: retrieving gpg key timed out.") != -1)  {
                         errors.push({
                             category: 'timeout',
                             type: '[gpg] Unable to install dependencies'
                         })
-                    }
-
-                    if (line.indexOf("Unable to connect to ") != -1)  {
+                    } else if (line.indexOf("Unable to connect to ") != -1)  {
                         errors.push({
                             category: 'connection',
                             type: 'Unable to install dependencies'
                         })
-                    }
-
-                    
-
-                    if (line.indexOf("Connection timed out") != -1)  {
+                    } else if (line.indexOf("Connection timed out") != -1)  {
                         errors.push({
                             category: 'timeout',
                             type: 'Connection timed out'
                         })
-                    }
-
-                    if (line.indexOf("The TLS connection was non-properly terminated.") != -1)  {
+                    } else if (line.indexOf("The TLS connection was non-properly terminated.") != -1)  {
                         errors.push({
                             category: 'connection',
                             type: 'Connection terminated'
                         })
-                    }
-
-                    if (line.indexOf("The job exceeded the maximum time limit for jobs, and has been terminated.") != -1)  {
+                    } else if (line.indexOf("The job exceeded the maximum time limit for jobs, and has been terminated.") != -1)  {
                         errors.push({
                             category: 'timeout',
                             type: 'Execution timeout'
                         })
+                    } else if (line.indexOf("No output has been received in the last 10m") != -1)  {
+                        errors.push({
+                            category: 'timeout',
+                            type: 'Log timeout'
+                        })
+                    } else if(result = line.match(/Failed to download file: (?<file>[^ ]+)/)) {
+                        errors.push({
+                            category: 'connection',
+                            type: 'Unable to install dependencies',
+                            library: result.groups.file
+                        })
+                    } else if(result = line.match(/Unable to locate package (?<file>[^ ]+)/)) {
+                        errors.push({
+                            category: 'library',
+                            type: 'Unable to install dependencies',
+                            library: result.groups.file
+                        })
+                    } else if (result = line.match(/error: failed to push some refs to '(?<file>[^']+)'/)) {
+                        errors.push({
+                            category: 'credential',
+                            type: 'Unable to push',
+                            library: result.groups.file
+                        })
                     }
+                    
 
                     
 
@@ -121,11 +136,29 @@ async function parseLog(log) {
                 }
             }
 
+            const reasons = errors.concat([]);
+            for (let test of tests) {
+                if (test.nbFailure > 0) {
+                    reasons.push({
+                        category: "test",
+                        test: test.name,
+                        type: 'Test failure'
+                    })
+                } 
+                if (test.nbError > 0) {
+                    reasons.push({
+                        category: "test",
+                        test: test.name,
+                        type: 'Test error'
+                    })
+                }
+            }
             resolve({
                 tests: tests,
                 errors: errors,
                 tool: tool,
-                exitCode
+                exitCode,
+                reasons
             })
         } catch (e) {
             return reject(e);

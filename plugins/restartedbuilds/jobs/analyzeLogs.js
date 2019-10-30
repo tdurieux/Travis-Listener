@@ -7,14 +7,17 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
 
     agenda.define('analyze jobs', {concurrency: 1}, async job => {
-        const cursor = logCollection.find({'analysis': {$exists: 0}}).sort({_id: -1});
+        const cursor = logCollection.find(/*{'analysis': {$exists: 0}}*/).sort({_id: -1});
 
         const nbLogs = await cursor.count()
         let count = 0
         const checked = new Set()
         
         while ((restartedLog = await cursor.next())) {
+            await job.touch();
             count++;
+            job.attrs.progression = {index: count, total: nbLogs}
+            await job.save();
             if (checked.has(restartedLog.id)) {
                 continue
             }
@@ -36,8 +39,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
 
             checked.add(restartedLog.id)
-            job.attrs.progression = {index: count, total: nbLogs}
-            await job.save();
+            await job.touch();
         }
     });
 };

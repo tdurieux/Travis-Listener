@@ -27,7 +27,7 @@ $.get('api/stat', function (data, res) {
     initChart('.states_chart', 'Bar', labels, series);
     initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
-    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)].map(v => days[v - 1]), getSeries(data.restartedPerDay));
+    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)], getSeries(data.restartedPerDay));
     initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v - 1]), getSeries(data.dayOfWeek));
     initChart('.hours_chart', 'Line', [...Object.keys(data.hours)].map(v => v + 'h'), getSeries(data.hours));
 })

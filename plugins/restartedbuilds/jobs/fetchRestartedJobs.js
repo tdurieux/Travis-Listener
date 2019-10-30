@@ -124,6 +124,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             }
             checked.add(build.id)
             for (let jobId of build.old.job_ids) {
+                await job.touch();
                 const currentJob = await jobsCollection.findOne({id: jobId});
                 if (currentJob != null) {
                     // job exist skip
@@ -141,6 +142,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             await jobsCollection.insertMany(newJobs)
                             for (let job of newJobs) {
                                 await saveLog(job.id)
+                                await job.touch();
                             }
                             job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
                             await job.save();
@@ -170,10 +172,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 }
                 for (let job of newJobs) {
                     await saveLog(job.id)
+                    await job.touch();
                 }
             }
         }
-        job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
-        await job.save();
     });
 };
