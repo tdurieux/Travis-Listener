@@ -163,12 +163,8 @@ a.white_border, a.white_border:hover, a.black_border, a.black_border:hover {
     display: block;
 }
 main .container {
-  margin-top: 40px 
-}
-
-.main {
-    width: 80%;
-    margin: auto;
+  margin-top: 40px;
+  min-width: 90%;
 }
 
 .ct-series .failed {
@@ -182,4 +178,7 @@ main .container {
 }
 .ct-series .passed {
   stroke: green;
+}
+.ct-chart-bar .ct-label.ct-horizontal.ct-end {
+  font-size: 10px;
 }
