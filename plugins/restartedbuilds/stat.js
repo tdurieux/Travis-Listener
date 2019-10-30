@@ -205,9 +205,17 @@ async function getEventType(buildsCollection) {
 async function getErrorTypes(collection) {
     const query = [
         {
+          '$project': {
+            'id': 1, 
+            'analysis.original.reasons': 1
+          }
+        }, {
           '$match': {
-            'analysis.original.reasons.0': {
-              '$exists': 1
+            'analysis.original.reasons': {
+              '$exists': true, 
+              '$not': {
+                '$size': 0
+              }
             }
           }
         }, {
