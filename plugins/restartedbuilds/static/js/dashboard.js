@@ -5,7 +5,33 @@ $.get('api/stat', function (data, res) {
     $('#restarted_builds_nb').text(data.nb_restarted_builds)
     $('#restarted_jobs_nb').text(data.nb_restarted_jobs)
     $('#restarted_project_nb').text(Object.keys(data.repositories).length)
-    const labels = [...Object.keys(data.states)]
+
+    const states = ['passed', 'failed', 'errored', 'canceled']
+
+    const errorLabels = [...Object.keys(data.errorTypes)].sort((o1, o2) => {
+        let counto1 = 0;
+        let counto2 = 0;
+        for (let count of [...Object.values(data.errorTypes[o1])]) {
+            counto1+=count
+        }
+        for (let count of [...Object.values(data.errorTypes[o2])]) {
+            counto2+=count
+        }
+        return counto2 - counto1
+    })
+    const errorSeries = []
+    for (let restartedState of states) {
+        const line = []
+        for (let label of errorLabels) {
+            const value = data.errorTypes[label][restartedState];
+            line.push({meta: 'Error ' + label + ' changed to ' + restartedState, value: value, className: restartedState})
+        }
+        errorSeries.push(line)
+    }
+
+    initChart('.errors_chart', 'Bar', errorLabels, errorSeries);
+
+    const labels = ['failed', 'errored', 'passed', 'canceled']
     const allLabels = [...Object.keys(data.states)]
     const series = []
     for (let oldState in data.states) {
@@ -15,15 +41,14 @@ $.get('api/stat', function (data, res) {
             }
         }
     }
-    for (let stateX of allLabels) {
+    for (let stateX of states) {
         const line = []
-        for (let stateY of labels) {
+        for (let stateY in data.states) {
             const value = data.states[stateY][stateX];
             line.push({meta: 'From ' + stateY + ' to ' + stateX, value: value, className: stateX})
         }
         series.push(line)
     }
-    initChart('.errors_chart', 'Bar', [...Object.keys(data.errorTypes)], getSeries(data.errorTypes));
     initChart('.states_chart', 'Bar', labels, series);
     initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
@@ -46,6 +71,12 @@ function getSeries(obj, max) {
     return [output];
 }
 function initChart(query, type, labels, series) {
+    let total = 0;
+    for (let values of series) {
+        for (let value of values) {
+            total += value.value || 0;
+        }
+    }
     new Chartist[type](query, {
         labels,
         series
@@ -61,7 +92,16 @@ function initChart(query, type, labels, series) {
         },
         plugins: [
             Chartist.plugins.tooltip({
-                appendToBody: false
+                appendToBody: false,
+                labelTooltipValue: (label) => {
+                    let value = 0;
+                    let index = labels.indexOf(label);
+                    for (let values of series) {
+                        console.log(values[index].value || 0)
+                        value += values[index].value || 0;
+                    }
+                    return value + " (" + Math.round(value * 100 /total) + "%)";
+                },
             })
         ]
     }, [

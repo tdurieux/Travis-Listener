@@ -211,6 +211,18 @@ async function getErrorTypes(collection) {
             }
           }
         }, {
+          '$lookup': {
+            'from': 'jobs', 
+            'localField': 'id', 
+            'foreignField': 'id', 
+            'as': 'job'
+          }
+        }, {
+          '$unwind': {
+            'path': '$job', 
+            'preserveNullAndEmptyArrays': false
+          }
+        }, {
           '$unwind': {
             'path': '$analysis.original.reasons', 
             'preserveNullAndEmptyArrays': false
@@ -219,7 +231,8 @@ async function getErrorTypes(collection) {
           '$group': {
             '_id': {
               'id': '$id', 
-              'type': '$analysis.original.reasons.type'
+              'type': '$analysis.original.reasons.type', 
+              'state': '$job.new.state'
             }, 
             'count': {
               '$sum': 1
@@ -227,14 +240,13 @@ async function getErrorTypes(collection) {
           }
         }, {
           '$group': {
-            '_id': '$_id.type', 
-            'countItem': {
+            '_id': {
+              'type': '$_id.type', 
+              'state': '$_id.state'
+            }, 
+            'count': {
               '$sum': 1
             }
-          }
-        }, {
-          '$sort': {
-            'countItem': -1
           }
         }
       ]
@@ -242,7 +254,10 @@ async function getErrorTypes(collection) {
     const result = await collection.aggregate(query).toArray()
     const output = {}
     for (let r of result) {
-        output[r._id] = r.countItem;
+        if (output[r._id.type] == null) {
+            output[r._id.type] = {}
+        }
+        output[r._id.type][r._id.state] = r.count;
     }
     return output;
 }

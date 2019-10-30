@@ -174,8 +174,11 @@ main .container {
 .ct-series .failed {
   stroke: red;
 }
-.ct-series .errored {
+.ct-series .canceled {
   stroke: grey;
+}
+.ct-series .errored {
+  stroke: blue;
 }
 .ct-series .passed {
   stroke: green;
