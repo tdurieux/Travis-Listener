@@ -31,6 +31,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     resolve(body);
                 });
             });
+
             if (output != null) {
                 restartedLog.analysis = output.analysis;
                 restartedLog.logDiff = output.logDiff;

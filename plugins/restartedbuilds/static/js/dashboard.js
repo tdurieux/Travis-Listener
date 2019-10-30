@@ -1,7 +1,6 @@
 const days = ['Sunday', 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 $.get('api/stat', function (data, res) {
-    console.log(data)
     $('#restarted_builds_nb').text(data.nb_restarted_builds)
     $('#restarted_jobs_nb').text(data.nb_restarted_jobs)
     $('#restarted_project_nb').text(Object.keys(data.repositories).length)
@@ -52,7 +51,7 @@ $.get('api/stat', function (data, res) {
     initChart('.states_chart', 'Bar', labels, series);
     initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
-    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)], getSeries(data.restartedPerDay));
+    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)].map(d => new Date(d)), getSeries(data.restartedPerDay));
     initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v - 1]), getSeries(data.dayOfWeek));
     initChart('.hours_chart', 'Line', [...Object.keys(data.hours)].map(v => v + 'h'), getSeries(data.hours));
 })
@@ -97,7 +96,6 @@ function initChart(query, type, labels, series) {
                     let value = 0;
                     let index = labels.indexOf(label);
                     for (let values of series) {
-                        console.log(values[index].value || 0)
                         value += values[index].value || 0;
                     }
                     return value + " (" + Math.round(value * 100 /total) + "%)";

@@ -43,7 +43,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
             newBuilds = await getBuildsFromIds(Object.keys(buildObj));
         }
         for (let build of newBuilds) {
-            delete build.commit;
+            build.commit = build.commit.sha;
             
             if (buildObj[build.id].started_at < build.started_at && build.state != 'started') {
                 restartedBuilds.push({

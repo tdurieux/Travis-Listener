@@ -59,14 +59,14 @@ async function connect (err) {
     buildsCollection.createIndex('id', {unique: true})
     unknownUsersCollection.createIndex(['author_email', 'author_name', 'committer_email', 'committer_name'], {unique: true})
     try {
-        await usersCollection.createIndex('email', {unique: true})
-        await usersCollection.createIndex('name', {unique: true})
+        await unknownUsersCollection.createIndex('author_email')
+        await unknownUsersCollection.createIndex('author_name')
 
-        await unknownUsersCollection.createIndex('author_email', {unique: true})
-        await unknownUsersCollection.createIndex('author_name', {unique: true})
+        await unknownUsersCollection.createIndex('committer_email')
+        await unknownUsersCollection.createIndex('committer_name')
 
-        await unknownUsersCollection.createIndex('committer_email', {unique: true})
-        await unknownUsersCollection.createIndex('committer_name', {unique: true})
+        await usersCollection.createIndex('email')
+        await usersCollection.createIndex('name')
 
         await logCollection.createIndex('id', {unique: true})
     } catch (error) {}
@@ -205,7 +205,7 @@ async function connect (err) {
                     commit.committed_at = new Date(commit.committed_at)
                 }
                 data.data.branch = commit.branch;
-                delete data.data.commit;
+                data.data.commit = commit.sha;
                 
                 commitsCollection.findOne({"sha": commit.sha}, function (err, result) {
                     if (!err && !result) {
