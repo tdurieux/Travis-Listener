@@ -116,13 +116,15 @@ async function connect (err) {
             if (!err && !result) {
                 request('https://api.travis-ci.org/jobs/' + jobId + '/log', function (err, resp, body) {
                     if (body != null && body.length > 0) {
-                        if (body[0] == '{') {
-                            console.log(body)
-                        }
-                        // body = stripAnsi(body)
-                        logCollection.insertOne({
-                            id: jobId,
-                            log: body
+                        request.post('http://logparser/api/clean', {
+                            timeout: 45000,
+                            body: {log: body},
+                            json: true
+                        }, (err, resp, body) => {
+                            logCollection.insertOne({
+                                id: jobId,
+                                log: body
+                            })
                         })
                     }
                 })

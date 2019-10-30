@@ -27,6 +27,10 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.post('/api/clean', (req, res) => {
+  const log = cleanLog(req.body.log);
+  return res.send(log).end()
+})
 app.post('/api/diff', (req, res) => {
   const hrstart = process.hrtime()
 
