@@ -2,6 +2,8 @@ const Parser = require("./Parser").Parser;
 
 const test = new RegExp("^([\\.sF\\*]{4,})$");
 
+const moduleNotFound = new RegExp("ModuleNotFoundError: No module named '(?<library>[^']+)'")
+
 class RubyParser extends Parser {
     constructor() {
         super("RubyParser");
@@ -21,7 +23,13 @@ class RubyParser extends Parser {
                 nbSkipped: (result[1].match(/\\s/g)||[]).length,
                 time: 0
             });
-        }
+        } else if ((result = moduleNotFound.exec(line))) {
+            this.errors.push({
+                category: 'library',
+                type: 'Module not found',
+                library: result.groups.library
+            })
+        } 
     }
 }
 

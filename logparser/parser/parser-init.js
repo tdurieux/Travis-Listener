@@ -7,6 +7,7 @@ const ObjcParser = require('./objcParser').Parser;
 const PhpParser = require('./phpParser').Parser;
 const GoParser = require('./goParser').Parser;
 const RubyParser = require('./rubyParser').Parser;
+const GenericParser = require('./genericParser').Parser;
 
 const startWith = require('../clean_log').startWith
 
@@ -20,13 +21,14 @@ async function parseLog(log) {
             /**
              * @type {Parser[]}
              */
-            const parsers = [new JavaParser(), new JsParser(), new PyParser(), new ObjcParser(), new PhpParser(), new RubyParser(), new GoParser()];
+            const parsers = [new JavaParser(), new JsParser(), new PyParser(), new ObjcParser(), new PhpParser(), new RubyParser(), new GoParser(), new GenericParser()];
 
             let exitCode = null;
 
             let tool = null;
             let tests = [];
             let errors = [];
+            let commit = null;
 
             let lineStart = 0;
             line: for (let i = 0; i < log.length; i++) {
@@ -49,6 +51,10 @@ async function parseLog(log) {
                             job.config = {};
                         }
                         job.config.language = line.replace("Build language: ", "");
+                    } else if (line.indexOf("$ git checkout -qf ") != -1) {
+                        commit = (line.replace("$ git checkout -qf ", ''))
+                    } else if (line.indexOf("git fetch origin ") != -1) {
+                        //console.log(line)
                     } else if (line.indexOf("Done. Your build exited with ") != -1) {
                         exitCode = parseInt(line.substring("Done. Your build exited with ".length, line.length -1));
                     } else if (line.indexOf("fatal: Could not read from remote repository.") != -1)  {
@@ -56,6 +62,12 @@ async function parseLog(log) {
                             type: 'Unable to clone'
                         })
                     } else if (result = line.match(/fatal: unable to access '(?<file>[^']+)'/)) {
+                        errors.push({
+                            category: 'credential',
+                            type: 'Unable to clone',
+                            library: result.groups.file
+                        })
+                    } else if (result = line.match(/fatal: Authentication failed for '(?<file>[^']+)'/)) {
                         errors.push({
                             category: 'credential',
                             type: 'Unable to clone',
@@ -96,7 +108,7 @@ async function parseLog(log) {
                             category: 'timeout',
                             type: 'Log timeout'
                         })
-                    } else if(result = line.match(/Failed to download file: (?<file>[^ ]+)/)) {
+                    } else if(result = line.match(/Failed to download (file|index): (?<file>[^ ]+)/)) {
                         errors.push({
                             category: 'connection',
                             type: 'Unable to install dependencies',
@@ -113,6 +125,11 @@ async function parseLog(log) {
                             category: 'credential',
                             type: 'Unable to push',
                             library: result.groups.file
+                        })
+                    } else if (line.indexOf('Address already in use') > -1) {
+                        errors.push({
+                            category: 'server',
+                            type: 'port already in use'
                         })
                     }
                     
@@ -161,7 +178,8 @@ async function parseLog(log) {
                 errors: errors,
                 tool: tool,
                 exitCode,
-                reasons
+                reasons,
+                commit
             })
         } catch (e) {
             return reject(e);

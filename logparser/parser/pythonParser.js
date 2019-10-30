@@ -14,6 +14,9 @@ const summaryTest3 = new RegExp("FAILED \\(SKIP=([0-9]+), errors=([0-9]+), failu
 const summaryTest4 = new RegExp("SUMMARY +([0-9]+)\/([0-9]+) tasks and ([0-9]+)\/([0-9]+) tests failed");
 const summaryTest5 = new RegExp("== ([0-9]+) failed, ([0-9]+) passed, ([0-9]+) skipped, ([0-9]+) pytest-warnings in ([0-9\.]+) seconds ===");
 
+const summaryTest6 = new RegExp("(?<failed>[0-9]+) failed, (?<passed>[0-9]+) passed(, (?<skipped>[0-9]+) skipped)?(, (?<warning>[0-9]+) warnings) in (?<time>[0-9\.]+)s");
+
+const moduleNotFound = new RegExp("ModuleNotFoundError: No module named '(?<library>[^']+)'")
 
 const testStartWithBody = new RegExp("^(.+)::(test_.+)");
 
@@ -73,6 +76,16 @@ class PyParser extends Parser {
                 nbSkipped: result[3],
                 time: result[5]
             });
+        } else if ((result = summaryTest6.exec(line))) {
+            this.tests.push({
+                name: "",
+                body: "",
+                nbTest: parseInt(result.groups.passed) + parseInt(result.groups.failed),
+                nbFailure: parseInt(result.groups.failed),
+                nbWarning: parseInt(result.groups.warning || 0),
+                nbSkipped: parseInt(result.groups.skipped || 0),
+                time: parseFloat(result.groups.time)
+            });
         } else if ((result = summaryTest2.exec(line))) {
             this.tool = "django";
             this.totalTime = parseFloat(result[2]);
@@ -88,7 +101,13 @@ class PyParser extends Parser {
             })
         } else if ((result = compilationError.exec(line))) {
             this.errors.push({
-                type: 'Compilation'
+                type: 'Compilation error'
+            })
+        } else if ((result = moduleNotFound.exec(line))) {
+            this.errors.push({
+                category: 'library',
+                type: 'Module not found',
+                library: result.groups.library
             })
         } else if ((result = test2.exec(line))) {
             this.tests.push({
