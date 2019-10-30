@@ -66,6 +66,11 @@ async function parseLog(log) {
                             category: 'timeout',
                             type: '[gpg] Unable to install dependencies'
                         })
+                    } else if (line.indexOf("Hash Sum mismatch") != -1)  {
+                        errors.push({
+                            category: 'connection',
+                            type: 'Incorrect hash sum'
+                        })
                     } else if (line.indexOf("Unable to connect to ") != -1)  {
                         errors.push({
                             category: 'connection',
@@ -110,8 +115,6 @@ async function parseLog(log) {
                             library: result.groups.file
                         })
                     }
-                    
-
                     
 
                     for (let parser of parsers) {
