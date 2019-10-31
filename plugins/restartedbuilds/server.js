@@ -48,6 +48,9 @@ server.listen(port, function () {
     require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
     agenda.start();
 
+    await agenda.every("one hour", 'fetch restarted builds')
+    await agenda.every("one hour", 'fetch restarted jobs')
+
     console.log("Restarted Service initialized");
     
     async function startTask(taskName, res) {
