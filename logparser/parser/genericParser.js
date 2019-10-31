@@ -8,7 +8,7 @@ const interactiveLogin = new RegExp("Error: Cannot perform an interactive login 
 const cmakeVersionProblem = new RegExp("CMake (?<expected>[0-9\.]+) or higher is required.  You are running version (?<actual>[0-9\.]+)")
 
 // [error] org.xmlaxAXParseException; lineNumber: 6; columnNumber: 3; The element type "hr" must be terminated by the matching end-tag "".
-const genericError = new RegExp("\[error\] (?<name>[^;]+); lineNumber: (?<line>[0-9]+); columnNumber: (?<column>[0-9]+); (?<message>.+)")
+const genericError = new RegExp("\\[error\\] (?<name>[^;]+); lineNumber: (?<line>[0-9]+); columnNumber: (?<column>[0-9]+); (?<message>.+)")
 
 class GenericParser extends Parser {
     constructor() {
