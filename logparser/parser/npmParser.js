@@ -7,10 +7,15 @@ const test3 = new RegExp("Executed ([0-9]+) of ([0-9]+) (.*) \\(([0-9\\.]*) secs
 const test4 = new RegExp("    ✗ (?<test>.*)")
 const test5 = new RegExp("^FAIL (?<test>.*)")
 
+// Spec Files:	 5 passed, 2 failed, 7 total (1 completed) in  
+const testSummary1 = new RegExp("Spec Files: +(?<passed>[0-9]+) passed, (?<failed>[0-9]+) failed, (?<total>[0-9]+) total")
+
+
 const error = new RegExp("(.+):([0-9]+):([0-9]+) - error ([A-Z1-9]+): (.+)")
 
 const endMocha = new RegExp("([1-9]+) passing (.*)\\(([1-9]+)(.*)s\\)$");
 
+const unavailableVersion = new RegExp("No matching version found for (?<library>[^@]+)@(?<version>.+)")
 const unavailablePackage = new RegExp("error Couldn't find package \"(?<library>[^\"]+)\" required by \"(?<required>[^\"]+)\"")
 
 class JsParser extends Parser {
@@ -94,6 +99,15 @@ class JsParser extends Parser {
                 nbError: 0,
                 nbSkipped: 0
             });
+        } else if (result = testSummary1.exec(line)) {
+            this.tests.push({
+                name: "",
+                body: "",
+                nbTest: result.groups.total,
+                nbFailure: result.groups.failure,
+                nbError: 0,
+                nbSkipped: 0
+            });
         } else if (result = error.exec(line)) {
             this.errors.push({
                 file: result[1],
@@ -109,6 +123,13 @@ class JsParser extends Parser {
                 type: 'Unable to install dependencies',
                 requiredBy: result.groups.required,
                 library: result.groups.library,
+            });
+        } else if (result = unavailableVersion.exec(line)) {
+            this.errors.push({
+                category: 'library',
+                type: 'Unable to install dependencies',
+                library: result.groups.library,
+                library: result.groups.version,
             });
         }
     }
