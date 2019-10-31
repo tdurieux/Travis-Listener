@@ -129,7 +129,7 @@ class JsParser extends Parser {
                 category: 'library',
                 type: 'Unable to install dependencies',
                 library: result.groups.library,
-                library: result.groups.version,
+                version: result.groups.version,
             });
         }
     }
