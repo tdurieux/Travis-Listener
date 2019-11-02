@@ -140,8 +140,8 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                             countRestarted += newJobs.length
                             console.log('Restarted jobs:', countRestarted)
                             await jobsCollection.insertMany(newJobs)
-                            for (let job of newJobs) {
-                                await saveLog(job.id)
+                            for (let j of newJobs) {
+                                await saveLog(j.id)
                                 await job.touch();
                             }
                             job.attrs.progression = {index: count, total: nbBuilds, countRestarted}
