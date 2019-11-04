@@ -28,6 +28,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                     body: {new: restartedLog.log, old: oldLog.log},
                     json: true
                 }, function (err, t, body) {
+                    if (err) {
+                        return resolve(null);
+                    }
                     resolve(body);
                 });
             });
@@ -36,7 +39,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 restartedLog.analysis = output.analysis;
                 restartedLog.logDiff = output.logDiff;
 
-                await logCollection.updateOne({id: restartedLog.id}, {$set: restartedLog}, {upsert: true})
+                await logCollection.updateOne({_id: restartedLog._id}, {$set: restartedLog}, {upsert: true})
             }
 
             checked.add(restartedLog.id)
