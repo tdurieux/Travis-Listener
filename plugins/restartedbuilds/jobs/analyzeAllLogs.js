@@ -1,4 +1,5 @@
 const request = require('request')
+const async = require('async');
 
 module.exports = function(agenda, db, buildsaverDB) {
     const logCollection = buildsaverDB.collection('logs')
@@ -11,22 +12,21 @@ module.exports = function(agenda, db, buildsaverDB) {
         const nbLogs = await cursor.count()
         let count = 0
         const checked = new Set()
-        
-        while ((restartedLog = await cursor.next())) {
+        async.eachLimit(cursor, 5, async (restartedLog) => {
             await job.touch();
             count++;
             job.attrs.progression = {index: count, total: nbLogs}
             await job.save();
             if (checked.has(restartedLog.id)) {
-                continue
+                return;
             }
             const oldReason = await reasonsCollection.findOne({id: restartedLog.id});
             if (oldReason) {
-                continue;
+                return;
             }
+            console.log(restartedLog.id)
             const output = await new Promise((resolve) => {
                     request.post('http://logparser/api/analyze', {
-                    timeout: 45000,
                     body: {log: restartedLog.log},
                     json: true
                 }, function (err, t, body) {
@@ -41,6 +41,6 @@ module.exports = function(agenda, db, buildsaverDB) {
 
             checked.add(restartedLog.id)
             await job.touch();
-        }
+        });
     });
 };
