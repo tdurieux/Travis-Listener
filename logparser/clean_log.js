@@ -77,9 +77,13 @@ function isEmpty(str) {
 }
 module.exports.cleanLog = function (log) {
     if (log == null) {
-      return '';
+      return null;
     }
-    log = stripAnsi(log).replace(/(?:\\[rn]|[\r\n])/g,'\n')
+    log = stripAnsi(log)
+    if (log == null) {
+      return null;
+    }
+    log = log.replace(/(?:\\[rn]|[\r\n])/g,'\n')
     const output = []
     const lines = log.split('\n')
     line: for (let line of lines) {
