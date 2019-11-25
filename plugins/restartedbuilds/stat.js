@@ -205,56 +205,23 @@ async function getEventType(buildsCollection) {
 async function getErrorTypes(collection) {
     const query = [
         {
-          '$project': {
-            'id': 1, 
-            'analysis.original.reasons': 1
-          }
-        }, {
-          '$match': {
-            'analysis.original.reasons': {
-              '$exists': true, 
-              '$not': {
-                '$size': 0
-              }
-            }
-          }
-        }, {
-          '$lookup': {
-            'from': 'jobs', 
-            'localField': 'id', 
-            'foreignField': 'id', 
-            'as': 'job'
-          }
-        }, {
           '$unwind': {
-            'path': '$job', 
-            'preserveNullAndEmptyArrays': false
-          }
-        }, {
-          '$unwind': {
-            'path': '$analysis.original.reasons', 
+            'path': '$reasons', 
             'preserveNullAndEmptyArrays': false
           }
         }, {
           '$group': {
             '_id': {
-              'id': '$id', 
-              'type': '$analysis.original.reasons.type', 
-              'state': '$job.new.state'
+              'reason': '$reasons', 
+              'state': '$restarted_state'
             }, 
             'count': {
               '$sum': 1
             }
           }
         }, {
-          '$group': {
-            '_id': {
-              'type': '$_id.type', 
-              'state': '$_id.state'
-            }, 
-            'count': {
-              '$sum': 1
-            }
+          '$sort': {
+            'count': -1
           }
         }
       ]
@@ -262,10 +229,10 @@ async function getErrorTypes(collection) {
     const result = await collection.aggregate(query).toArray()
     const output = {}
     for (let r of result) {
-        if (output[r._id.type] == null) {
-            output[r._id.type] = {}
+        if (output[r._id.reason] == null) {
+            output[r._id.reason] = {}
         }
-        output[r._id.type][r._id.state] = r.count;
+        output[r._id.reason][r._id.state] = r.count;
     }
     return output;
 }
@@ -298,7 +265,7 @@ async function getCount(collection) {
     return await collection.count()
 }
 
-module.exports.stat = async function (buildsCollection, jobsCollection, logsCollection, originalBuildsCollection) {
+module.exports.stat = async function (buildsCollection, jobsCollection, logsCollection, originalBuildsCollection, reasonsCollection) {
     const labels = []
     const promises = []
     promises.push(getChangedState(buildsCollection))
@@ -331,13 +298,13 @@ module.exports.stat = async function (buildsCollection, jobsCollection, logsColl
     promises.push(perDay(originalBuildsCollection, "$started_at"))
     labels.push('originalPerDay')
 
-    promises.push(getDayOfWeek(buildsCollection))
-    labels.push('dayOfWeek')
+    // promises.push(getDayOfWeek(buildsCollection))
+    // labels.push('dayOfWeek')
 
-    promises.push(getHours(buildsCollection))
-    labels.push('hours')
+    // promises.push(getHours(buildsCollection))
+    // labels.push('hours')
 
-    promises.push(getErrorTypes(logsCollection))
+    promises.push(getErrorTypes(reasonsCollection))
     labels.push('errorTypes')
 
     const results = await Promise.all(promises);

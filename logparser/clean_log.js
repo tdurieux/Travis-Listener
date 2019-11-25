@@ -83,6 +83,15 @@ module.exports.cleanLog = function (log) {
     if (log == null) {
       return null;
     }
+    if (log.replace == null) {
+      if (log.log) {
+        log = log.log;
+        console.log(Object.keys(log))
+        return null;
+      } else {
+        return null;
+      }
+    }
     log = log.replace(/(?:\\[rn]|[\r\n])/g,'\n')
     const output = []
     const lines = log.split('\n')
@@ -110,6 +119,9 @@ module.exports.cleanLog = function (log) {
 }
 
 module.exports.normalizeLog = function (log) {
+    if (log == null) {
+      return null;
+    }
     const output = []
 
     const lines = log.split('\n')

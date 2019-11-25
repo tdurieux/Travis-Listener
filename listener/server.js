@@ -58,7 +58,7 @@ app.get('/api/jobs', async function (req, res) {
     res.json(builds);
 });
 
-scanner.scan();
+//scanner.scan();
 scanner.emitter.on("job", job => {
   wss.broadcast({
       event: "job",

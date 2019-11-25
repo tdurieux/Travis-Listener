@@ -15,6 +15,9 @@ const fold_start = new RegExp("travis_fold:start:(.*)");
 const fold_end = new RegExp("travis_fold:end:(.*)");
 
 async function parseLog(log) {
+    if (log == null) {
+        return null;
+    }
     return new Promise(async (resolve, reject) => {
         const job = {}
         try {

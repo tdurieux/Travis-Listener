@@ -35,6 +35,7 @@ server.listen(port, function () {
     const buildsCollection = await db.createCollection( "builds")
     const jobsCollection = await db.createCollection( "jobs")
     const logCollection = await db.createCollection( "logs")
+    const reasonsCollection = await db.createCollection( "reasons")
     const buildSaverLogCollection = await buildsaver_db.createCollection( "logs")
 
     // create index
@@ -47,6 +48,7 @@ server.listen(port, function () {
     require('./jobs/analyzeLogs')(agenda, db, buildsaver_db);
     require('./jobs/analyzeAllLogs')(agenda, db, buildsaver_db);
     require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
+    require('./jobs/stat')(agenda, db, buildsaver_db);
     agenda.start();
 
     await agenda.every("one hour", 'fetch restarted builds')
@@ -67,6 +69,10 @@ server.listen(port, function () {
             }
         }
     }
+    app.get("/api/stat/generate", async function (req, res) {
+        const TASK_NAME = 'generate reasons'
+        startTask(TASK_NAME, res)
+    });
     app.get("/api/logs/analyze", async function (req, res) {
         const TASK_NAME = 'analyze all jobs'
         startTask(TASK_NAME, res)
@@ -193,7 +199,7 @@ server.listen(port, function () {
     })
 
     app.get('/api/stat/', async function (req, res) {
-        const results = await stat(buildsCollection, jobsCollection, logCollection, buildsaver_db.collection('builds'))
+        const results = await stat(buildsCollection, jobsCollection, logCollection, buildsaver_db.collection('builds'), reasonsCollection)
         res.json(results);
     })
 })()

@@ -64,7 +64,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const maxRequest = 250
 
         let currentRequest = []
-        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-3))}}, {$or: [{state: 'errored'}, {state: 'failed'}, {state: 'canceled'}, {state: 'passed'}]}]}).sort( { _id: 1 } );
+        const cursor = buildsaverDB.collection('builds').find();
         const nbBuild = await cursor.count()
         let count = 0
         let countRestarted = 0

@@ -6,7 +6,7 @@ const server = require('http').Server(app);
 var port = process.env.PORT || 4000;
 
 function getToken() {
-  const tokens =  []
+  const tokens =  ['faf812daf02f1f5e664329a7ceb86c0e80ea9d81', 'c14e30b9609114edaad3c528c1b3d57cc4080956', 'faf812daf02f1f5e664329a7ceb86c0e80ea9d81', '731d7fdde68e867095ce4388f34fff6a971e510f']
   return tokens[Math.round(Math.random() * (tokens.length -1))]
 }
 

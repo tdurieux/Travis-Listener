@@ -128,8 +128,8 @@ async function getLatestJobs() {
 
 async function scan(opt) {
     opt = Object.assign({}, {
-        items: 200,
-        wait: 1000,
+        items: 220,
+        wait: 250,
         scanUnfinished: true
     }, opt);
 

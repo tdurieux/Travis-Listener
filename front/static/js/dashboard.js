@@ -11,9 +11,6 @@ travisListener.connect({
 })
 
 let statWsUrl = location.hostname + ':5525'
-if (location.hostname != 'localhost') {
-    statWsUrl = location.hostname + '/ws/'
-}
 const statWS = new WebSocket(protocol + '://' + statWsUrl)
 
 

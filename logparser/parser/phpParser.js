@@ -38,6 +38,16 @@ class PhpParser extends Parser {
                 time: parseInt(test[1]) * 60 + parseInt(test[2])
             };
         } else if (test = testResults.exec(line)) {
+            if (this.currentTest == null) {
+                this.currentTest = {
+                    name: "",
+                    body: "",
+                    nbTest: parseInt(test[1]),
+                    nbFailure: test[6] ? parseInt(test[6]) : 0,
+                    nbError: test[4] ? parseInt(test[4]) : 0,
+                    nbSkipped: test[8] ? parseInt(test[8]) : 0
+                };
+            }
             this.currentTest.nbTest = parseInt(test[1]);
             this.currentTest.nbAssertion = parseInt(test[2]);
             this.currentTest.nbError = test[4] ? parseInt(test[4]) : 0;
@@ -47,6 +57,13 @@ class PhpParser extends Parser {
             this.tests.push(this.currentTest);
             this.currentTest = null;
         } else if (test = testResultsOk.exec(line)) {
+            if (this.currentTest == null) {
+                this.currentTest = {
+                    name: "",
+                    body: "",
+                    nbTest: parseInt(test[1])
+                };
+            }
             this.currentTest.nbTest = parseInt(test[1]);
             this.currentTest.nbAssertion = parseInt(test[2]);
             this.tests.push(this.currentTest);
