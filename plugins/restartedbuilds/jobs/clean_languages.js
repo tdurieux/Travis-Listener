@@ -22,9 +22,9 @@ const supported_langs = {
     "node.js": ["node_js", "node-js", "javascript", "node", 'js', 'nodejs', 'typescript'],
     "julia": [],
     "lua": [],
-    "latex": [],
+    "latex": ['tex'],
     "lisp": [],
-    "minimal": ["bash", "shell", "sh", 'none', 'vim', "defaults", 'base'],
+    "minimal": ["bash", "shell", "sh", 'none', 'vim', "defaults", 'base', 'default', 'slim'],
     "nix": [],
     "objective-c": ["obj-c"],
     "ocaml": [],
@@ -82,7 +82,7 @@ function getLang(lang) {
 }
 
 module.exports = function(agenda, restartedDB, buildsaverDB) {
-    const jobsCollection = buildsaverDB.collection('jobs')
+    const jobsCollection = buildsaverDB.collection('builds')
     const stat = {}
     agenda.define('clean languages', {concurrency: 1}, async job => {
         await jobsCollection.find({}).forEach(j => {
