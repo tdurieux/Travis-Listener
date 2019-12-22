@@ -45,7 +45,7 @@ function getLang(lang) {
     if (lang == null) {
         return null
     }
-    if (lang.length != null) {
+    if (Array.isArray(lang)) {
         lang = lang[0]
     }
     if (lang[0] == '{') {
