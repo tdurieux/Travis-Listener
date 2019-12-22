@@ -197,7 +197,7 @@ async function connect (err) {
                 data.data.started_at = new Date(data.data.started_at)
             }
             if (data.data.repository_id) {
-                saveRepo(data.data.repository_id)
+                // saveRepo(data.data.repository_id)
             }
             if (data.data.commit) {
                 const commit = data.data.commit;
@@ -224,7 +224,7 @@ async function connect (err) {
             if (data.data.config.language) {
                 data.data.language = data.data.config.language
             }
-            if (data.event == 'build') {
+            if (data.event == 'build') { 
                 const build = data.data
                 buildsCollection.insertOne(build, (err, result) => {
                     if (err) {

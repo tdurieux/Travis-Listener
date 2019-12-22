@@ -138,8 +138,8 @@ async function scan(opt) {
     }
     const jobs = await getLatestJobs();
 
-    let maxJobId = Math.min.apply(Math, jobs.map(j => j.id))
-    let maxBuildId = Math.min.apply(Math, jobs.map(j => j.build_id))
+    let maxJobId = Math.max.apply(Math, jobs.map(j => j.id))
+    let maxBuildId = Math.max.apply(Math, jobs.map(j => j.build_id))
 
     async.forever(async () => {
         try {
@@ -182,19 +182,28 @@ async function scan(opt) {
 function checkUnfinished(unfinishedItems, func, prefix) {
     return getUnfinished(unfinishedItems, func, items => {
         items.forEach(item => {
+            const oldItem = unfinishedItems[item.id]
+            const oldStart = oldItem.started_at;
+            if (oldStart != null && item.started_at != oldStart) {
+                console.log("Restarted", item.id, unfinishedItems[item.id].state, item.state, oldStart, item.started_at);
+                itemEmitter.emit(prefix + "_restarted", item);
+
+            }
+            const oldState = unfinishedItems[item.id].state;
+            unfinishedItems[item.id] = item;
+            if (oldStart != null) {
+                unfinishedItems[item.id].started_at = oldStart
+            }
             if(!isFinished(item)) {
-                if (unfinishedItems[item.id].state != item.state) {
-                    unfinishedItems[item.id] = item;
-                    itemEmitter.emit(prefix + "_updated", item);
-                } else {
-                    unfinishedItems[item.id] = item;
+                if (oldState != item.state) {
+                    itemEmitter.emit(prefix + "_updated", unfinishedItems[item.id]);
                 }
                 return;
             } else if (unfinishedItems[item.id] != null) {
                 // update state
+                itemEmitter.emit(prefix + "_finished", unfinishedItems[item.id]);
+                itemEmitter.emit(prefix + "_updated", unfinishedItems[item.id]);
                 delete unfinishedItems[item.id];
-                itemEmitter.emit(prefix + "_finished", item);
-                itemEmitter.emit(prefix + "_updated", item);
             }
         });
     });
@@ -202,8 +211,21 @@ function checkUnfinished(unfinishedItems, func, prefix) {
 
 function scanUnfinished(opt) {
     async.forever(async _ => {
-        await Promise.all([checkUnfinished(unfinishedBuilds, getBuildsFromIds, 'build'), checkUnfinished(unfinishedJobs, getJobsFromIds, 'job')])
-        await timeout(opt.wait)
+        try {
+            console.log('start unfinishedBuilds', Object.keys(unfinishedBuilds).length)
+            await checkUnfinished(unfinishedBuilds, getBuildsFromIds, 'build')
+        } catch (error) {
+            console.error(error)
+        }
+    })
+    async.forever(async _ => {
+        try {
+            console.log('start unfinishedJobs', Object.keys(unfinishedJobs).length)
+            await checkUnfinished(unfinishedJobs, getJobsFromIds, 'job')   
+        } catch (error) {
+            console.error(error)
+        }
+        // await timeout(opt.wait)
     });
 }
 
@@ -216,19 +238,20 @@ async function getUnfinished(unfinishedItems, func, progress) {
         const sortable = Object.keys(unfinishedItems);
 
         sortable.sort(function (a, b) {
-            return new Date(unfinishedItems[a].started_at) - new Date(unfinishedItems[b].started_at);
+            return new Date(unfinishedItems[b].started_at) - new Date(unfinishedItems[a].started_at);
         });
 
         if (sortable.length === 0) {
             return setTimeout(_=>{resolve([])}, 2000);
         }
 
-        const requestPerPage = 250;
-        const nbParallel = 2;
+        const requestPerPage = 75;
+        const nbParallel = 4;
 
         let results = [];
         async.timesLimit(Math.ceil(sortable.length/requestPerPage), nbParallel, async i => {
             const updatedBuilds = await func(sortable.slice(i * requestPerPage, i*requestPerPage + requestPerPage));
+            console.log(i * requestPerPage, i*requestPerPage + requestPerPage, sortable.slice(i * requestPerPage, i*requestPerPage + requestPerPage).length, updatedBuilds.length)
             if (progress) {
                 progress(updatedBuilds);
             }

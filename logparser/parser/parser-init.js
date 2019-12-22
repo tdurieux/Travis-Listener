@@ -86,7 +86,19 @@ async function parseLog(log) {
                             category: 'connection',
                             type: 'Incorrect hash sum'
                         })
-                    } else if (line.indexOf("Unable to connect to ") != -1)  {
+                    // Could not connect to apt.cache.travis-ci.com:80 (), connection timed out
+                    } else if (line.indexOf("Could not connect to ") != -1)  {
+                        errors.push({
+                            category: 'connection',
+                            type: 'Unable to install dependencies'
+                        })
+                    // error: component download failed for 
+                    } else if (line.indexOf("error: component download failed for ") != -1)  {
+                        errors.push({
+                            category: 'connection',
+                            type: 'Unable to install dependencies'
+                        })
+                    }else if (line.indexOf("Unable to connect to ") != -1)  {
                         errors.push({
                             category: 'connection',
                             type: 'Unable to install dependencies'
@@ -103,12 +115,12 @@ async function parseLog(log) {
                         })
                     } else if (line.indexOf("The job exceeded the maximum time limit for jobs, and has been terminated.") != -1)  {
                         errors.push({
-                            category: 'timeout',
+                            category: 'travis',
                             type: 'Execution timeout'
                         })
                     } else if (line.indexOf("No output has been received in the last 10m") != -1)  {
                         errors.push({
-                            category: 'timeout',
+                            category: 'travis',
                             type: 'Log timeout'
                         })
                     } else if(result = line.match(/Failed to download (file|index): (?<file>[^ ]+)/)) {
@@ -129,7 +141,7 @@ async function parseLog(log) {
                             type: 'Unable to push',
                             library: result.groups.file
                         })
-                    } else if (line.indexOf('Address already in use') > -1) {
+                    } else if (line.toLowerCase().indexOf('address already in use') > -1) {
                         errors.push({
                             category: 'server',
                             type: 'port already in use'

@@ -109,7 +109,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         //         }
         //     }
         // }]
-        const cursor = buildsCollection.find({}, {id: 1, old: 1}).sort( { _id: -1 } );
+        const cursor = buildsCollection.find({}, {projection: {id: 1, old: 1}}).sort( { _id: -1 } );
 
         const nbBuilds = await cursor.count()
 
@@ -127,6 +127,10 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
                 await job.touch();
                 const currentJob = await jobsCollection.findOne({id: jobId});
                 if (currentJob != null) {
+                    const currentLog = await logCollection.findOne({id: jobId});
+                    if (currentLog == null) {
+                        await saveLog(jobId)
+                    }
                     // job exist skip
                     continue
                 }

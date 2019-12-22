@@ -292,11 +292,11 @@ module.exports.stat = async function (buildsCollection, jobsCollection, logsColl
     promises.push(perDay(buildsCollection))
     labels.push('perDay')
 
-    promises.push(perDay(buildsCollection, "$old.started_at"))
+    promises.push(perDay(buildsCollection, "$new.started_at"))
     labels.push('restartedPerDay')
 
-    promises.push(perDay(originalBuildsCollection, "$started_at"))
-    labels.push('originalPerDay')
+    // promises.push(perDay(originalBuildsCollection, "$started_at"))
+    // labels.push('originalPerDay')
 
     // promises.push(getDayOfWeek(buildsCollection))
     // labels.push('dayOfWeek')

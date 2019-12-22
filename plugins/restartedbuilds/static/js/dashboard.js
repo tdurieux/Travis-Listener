@@ -51,15 +51,31 @@ $.get('api/stat', function (data, res) {
     initChart('.states_chart', 'Bar', labels, series);
     initChart('.langs_chart', 'Bar', [...Object.keys(data.languages)].splice(0, 15), getSeries(data.languages, 15));
     initChart('.events_chart', 'Bar', [...Object.keys(data.events)], getSeries(data.events));
-    initChart('.date_chart', 'Bar', [...Object.keys(data.restartedPerDay)].map(d => new Date(d)), getSeries(data.restartedPerDay));
+
+    const restartedDates = [...Object.keys(data.restartedPerDay)]
+    restartedDates.sort((a, b) => new Date(a) - new Date(b))
+    const restartedDatesValues = []
+    for (let d of restartedDates) {
+        restartedDatesValues.push(data.restartedPerDay[d])
+    }
+    initChart('.date_chart', 'Bar', restartedDates.map(d => {
+        if (!d) {
+            return 'N.A'
+        }
+        return (new Date(d).getDate() + 1) + '/' + (new Date(d).getMonth() + 1)
+    }), getSeries(restartedDatesValues, null, restartedDates.map(d => new Date(d).toLocaleString("en-GB", {timeZone: "Europe/London", weekday: 'short', day: "2-digit", month: 'short'}))));
     initChart('.days_chart', 'Bar', [...Object.keys(data.dayOfWeek)].map(v => days[v - 1]), getSeries(data.dayOfWeek));
     initChart('.hours_chart', 'Line', [...Object.keys(data.hours)].map(v => v + 'h'), getSeries(data.hours));
 })
 
-function getSeries(obj, max) {
+function getSeries(obj, max, labels) {
     const output = [];
     for (let key in obj) {
-        output.push({meta: key, value: obj[key]})
+        let label = key;
+        if (labels) {
+            label = labels[key]
+        }
+        output.push({meta: label, value: obj[key]})
         if (max != null) {
             max--;
             if (max == 0) {

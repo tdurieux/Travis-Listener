@@ -2,6 +2,7 @@ version: '2.4'
 services:
   front:
     build: front
+    restart: on-failure
     command: nodemon server.js
     volumes:
       - ./front:/app
@@ -16,6 +17,7 @@ services:
       - listener
   listener:
     build: listener
+    restart: on-failure
     command: nodemon server.js
     volumes:
       - ./listener:/app
@@ -23,6 +25,7 @@ services:
       - back-tier
   github:
     build: github
+    restart: on-failure
     command: nodemon server.js
     volumes:
       - ./github:/app
@@ -30,6 +33,7 @@ services:
       - back-tier
   logparser:
     build: logparser
+    restart: on-failure
     command: nodemon server.js
     volumes:
       - ./logparser:/app
@@ -37,6 +41,7 @@ services:
       - back-tier
   buildsaver:
     build: plugins/buildsaver
+    restart: on-failure
     command: nodemon server.js
     volumes:
       - ./plugins/buildsaver:/app
@@ -48,6 +53,7 @@ services:
   restartedbuilds:
     build: plugins/restartedbuilds
     command: nodemon server.js
+    restart: on-failure
     volumes:
       - ./plugins/restartedbuilds:/app
     networks:
@@ -57,6 +63,7 @@ services:
     cpu_count: 2
   mongo:
     image: mongo:latest
+    restart: on-failure
     ports:
       - "27017:27017"
     volumes:
@@ -73,7 +80,7 @@ services:
       timeout: 10s
       retries: 5
     cpu_count: 5
-    mem_limit: 10g
+    mem_limit: 25g
 volumes:
   db-data:
 

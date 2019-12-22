@@ -268,3 +268,13 @@ input[type=search] {
 .job.passed td:first-child::before {
     background: green
 }
+
+
+#services .service > * {
+    display: inline-block;
+    min-width: 220px
+}
+
+#services .service {
+    border-bottom: #DDD solid 1px;
+}

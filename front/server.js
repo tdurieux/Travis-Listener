@@ -70,7 +70,6 @@ app.use('/r/', proxy(selectProxyHost, {
         let url = req.url.substring(1, req.url.length);
         const indexService = url.indexOf('/')
         url = url.substring(indexService, url.length)
-        console.log(url)
         return url;
     },
 }));
@@ -79,7 +78,7 @@ function startListenerConnection() {
     try {
         const wsClient = new WebSocket('ws://listener');
         wsClient.on('error', function(){
-            return setTimeout(startListenerConnection, 100);
+            return setTimeout(startListenerConnection, 250);
         })
         wsClient.on('message', function incoming(data) {
             wssServer.broadcast(data)
@@ -95,10 +94,10 @@ function startListenerConnection() {
         wsClient.on('close', function(){
             that.isAlive = false;
             // Try to reconnect in 5 seconds
-            return setTimeout(startListenerConnection, 5000);
+            return setTimeout(startListenerConnection, 250);
         });
     } catch (e) {
-        return setTimeout(startListenerConnection, 100);
+        return setTimeout(startListenerConnection, 250);
     }
 }
 

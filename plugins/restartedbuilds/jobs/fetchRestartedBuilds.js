@@ -47,7 +47,9 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         }
         for (let build of newBuilds) {
             build.commit = build.commit.sha;
-            
+            if (buildObj[build.id].started_at < build.started_at) {
+                console.log(buildObj[build.id].started_at, build.started_at)
+            }
             if (buildObj[build.id].started_at < build.started_at && build.state != 'started') {
                 restartedBuilds.push({
                     id: build.id,
@@ -64,7 +66,7 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
         const maxRequest = 250
 
         let currentRequest = []
-        const cursor = buildsaverDB.collection('builds').find();
+        const cursor = buildsaverDB.collection('builds').find({$and: [{started_at: {$gt: new Date(new Date().setDate(new Date().getDate()-30))}}, {'state': {$ne: 'started'}}, {'state': {$ne: 'created'}}]}, {sort: {_id: -1}});
         const nbBuild = await cursor.count()
         let count = 0
         let countRestarted = 0

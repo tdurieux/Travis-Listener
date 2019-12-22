@@ -176,10 +176,7 @@ const times = {
 
 var iv = setInterval( function() {
     const d = new Date()
-    if (previousTime == null) {
-        previousTime = Math.floor(d.getTime()/1000) - 1
-    }
-    const key = previousTime++
+    const key = Math.floor(d.getTime()/1000) - 1
 
     var data = {};
     for (let i in times) {
@@ -221,24 +218,48 @@ var iv = setInterval( function() {
 travisListener.on((data, event) => {
     const d = new Date()
     const key = Math.floor(d.getTime()/1000)
+    if (times[event] == null) {
+        times[event] = {}
+    }
     if (times[event][key] == null) {
         times[event][key] = []
     }
     times[event][key].push(data)
 });
 
+function humanFileSize(bytes, si) {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
+}
+
 statWS.onmessage = m => {
     const data = JSON.parse(m.data);
     if (data.event == 'os') {
         document.getElementById('clients').innerText = data.data.connectedClient
 
+        let content = ''        
+
         const cpuData = {}
         const memoryData = {}
 
-        for (let service in data.data.services) {
+        for (let service of Object.keys(data.data.services).sort()) {
             cpuData[service] = data.data.services[service].cpu_percent
             memoryData[service] = data.data.services[service].mem_percent
+
+            content += '<div class="service"><h3 class="name">' + service + '</h3> <div class="memory">Mem: ' + humanFileSize(data.data.services[service].mem_usage) + ' (' + Math.round(data.data.services[service].mem_percent) + '%)' + '</div> <div class="cpu">CPU: ' + Math.round(data.data.services[service].cpu_percent) + '%' + '</div></div>'
         }
+        document.getElementById('services').innerHTML = content
         cpu.series.addData(cpuData);
         cpu.render();
         memory.series.addData(memoryData);

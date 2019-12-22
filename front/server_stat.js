@@ -28,26 +28,32 @@ wssServer.on('connection', function connection(ws) {
     ws.on('pong', () => ws.isAlive = true);
 });
 
-setInterval(async () => {
+const getStat = async () => {
     try {
         let data = await dockerstats.dockerContainers();
         const output = {
             services: {},
             connectedClient: 0
         }
+        const promises = []
+        const names = []
         for (let container of data) {
             if (container.name.indexOf(APP_NAME) > -1) {
-                const stat = (await dockerstats.dockerContainerStats(container.id))[0];
-
-                const name = container.name.replace(APP_NAME + '_', '')
-                output.services[name] = {
-                    mem_usage: stat.mem_usage,
-                    mem_limit: stat.mem_limit,
-                    mem_percent: stat.mem_percent,
-                    cpu_percent: stat.cpu_percent,
-                    net_in: stat.netIO.rx,
-                    net_out: stat.netIO.tx
-                }
+                promises.push(dockerstats.dockerContainerStats(container.id))
+                names.push(container.name.replace(APP_NAME + '_', ''))
+            }
+        }
+        const results = await Promise.all(promises)
+        for (let i in results) {
+            const stat = results[i][0];
+            const name = names[i];
+            output.services[name] = {
+                mem_usage: stat.mem_usage,
+                mem_limit: stat.mem_limit,
+                mem_percent: stat.mem_percent,
+                cpu_percent: stat.cpu_percent,
+                net_in: stat.netIO.rx,
+                net_out: stat.netIO.tx
             }
         }
 
@@ -60,8 +66,12 @@ setInterval(async () => {
         }))   
     } catch (error) {
         console.log(error)
+    } finally {
+        setTimeout(getStat, 500);
     }
-}, 500)
+}
+
+getStat();
 
 server.listen(port, function (err) {
     var port = server.address().port;
