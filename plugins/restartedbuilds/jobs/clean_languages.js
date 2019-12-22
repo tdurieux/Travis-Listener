@@ -38,12 +38,15 @@ const supported_langs = {
     "scala": [],
     "smalltalk": [],
     "swift": [],
-    "visual basic": []
+    "visual basic": ["visualbasic"]
 }
 
 function getLang(lang) {
     if (lang == null) {
         return null
+    }
+    if (lang.toLowerCase == null) {
+        console.log(lang)
     }
     lang = lang.toLowerCase().replace(';', '').replace('2.7', '').replace('3.6', '')
     lang = lang.split(' - ')[0]
@@ -68,7 +71,7 @@ function getLang(lang) {
             }
         }
     }
-    return null;
+    return lang;
 }
 
 module.exports = function(agenda, restartedDB, buildsaverDB) {
