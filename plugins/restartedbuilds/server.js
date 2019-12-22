@@ -48,6 +48,7 @@ server.listen(port, function () {
     require('./jobs/analyzeLogs')(agenda, db, buildsaver_db);
     require('./jobs/analyzeAllLogs')(agenda, db, buildsaver_db);
     require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
+    require('./jobs/clean_languages')(agenda, db, buildsaver_db);
     require('./jobs/stat')(agenda, db, buildsaver_db);
     agenda.start();
 
@@ -71,6 +72,10 @@ server.listen(port, function () {
     }
     app.get("/api/stat/generate", async function (req, res) {
         const TASK_NAME = 'generate reasons'
+        startTask(TASK_NAME, res)
+    });
+    app.get("/api/languages", async function (req, res) {
+        const TASK_NAME = 'clean languages'
         startTask(TASK_NAME, res)
     });
     app.get("/api/logs/analyze", async function (req, res) {
