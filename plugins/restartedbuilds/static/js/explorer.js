@@ -15,7 +15,15 @@ $.get('/r/restartedbuilds/api/jobs?limit=100').then(builds => {
         </div>\
         <p class="mb-1">' + build.old.language+'</p>\
       </a>';
-      content_details += '<div class="tab-pane fade" id="list-' + build.id + '" role="tabpanel" aria-labelledby="list-' + build.id + '-list"><button class="analyze btn" data-job-id="' + build.id + '">Analyze</button>' + JSON.stringify(build.log.analysis.original, null, 2) + '<pre>' + build.log.logDiff.substring(build.log.logDiff.length - 2500) + '</pre></div>';
+      let analysis = ''
+      if (build.log.analysis) {
+        analysis = JSON.stringify(build.log.analysis.original, null, 2)
+      }
+      let diff = ''
+      if (build.log.logDiff) {
+          diff = build.log.logDiff.substring(build.log.logDiff.length - 2500)
+      }
+      content_details += '<div class="tab-pane fade" id="list-' + build.id + '" role="tabpanel" aria-labelledby="list-' + build.id + '-list"><button class="analyze btn" data-job-id="' + build.id + '">Analyze</button>' + analysis + '<pre>' + diff + '</pre></div>';
     }
     $('#restarted_builds_nb').text(count)
 

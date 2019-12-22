@@ -50,6 +50,7 @@ server.listen(port, function () {
     require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
     require('./jobs/clean_languages')(agenda, db, buildsaver_db);
     require('./jobs/stat')(agenda, db, buildsaver_db);
+    require('./jobs/restarted_stat')(agenda, db, buildsaver_db);
     agenda.start();
 
     await agenda.every("one hour", 'fetch restarted builds')
@@ -71,7 +72,7 @@ server.listen(port, function () {
         }
     }
     app.get("/api/stat/generate", async function (req, res) {
-        const TASK_NAME = 'generate reasons'
+        const TASK_NAME = 'generate restarted reasons'
         startTask(TASK_NAME, res)
     });
     app.get("/api/languages", async function (req, res) {

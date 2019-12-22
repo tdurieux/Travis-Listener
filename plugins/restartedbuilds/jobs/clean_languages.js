@@ -85,13 +85,15 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
     const jobsCollection = buildsaverDB.collection('builds')
     const stat = {}
     agenda.define('clean languages', {concurrency: 1}, async job => {
-        await jobsCollection.find({}).forEach(j => {
+        await jobsCollection.find({}).forEach(async j => {
             try {
                 const l = getLang(j.language)
                 if (l == null) {
                     console.log(j.language)
                 } else {
                     stat[l] = (stat[l] || 0) + 1
+                    j.language = l;
+                    await jobsCollection.updateOne({_id: j._id}, {$set: j}, {upsert: true})
                 }
             } catch (error) {
                 console.log(error)
