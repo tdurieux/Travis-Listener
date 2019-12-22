@@ -48,7 +48,14 @@ function getLang(lang) {
     if (lang.length != null) {
         lang = lang[0]
     }
-    lang = lang.toLowerCase().replace(';', '').replace('2.7', '').replace('3.6', '')
+    if (lang[0] == '{') {
+        lang = lang.replace('{:', '').split('=>')[0]
+    }
+    lang = lang.toLowerCase()
+                .replace(';', '')
+                .replace('2.7', '')
+                .replace('3.6', '')
+                .replace('3.7.4', '')
     lang = lang.split(' - ')[0]
     lang = lang.split(' ')[0]
     if (supported_langs[lang]) {
