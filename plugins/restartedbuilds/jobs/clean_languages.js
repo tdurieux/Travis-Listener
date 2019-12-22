@@ -45,8 +45,8 @@ function getLang(lang) {
     if (lang == null) {
         return null
     }
-    if (lang.toLowerCase == null) {
-        console.log(lang)
+    if (lang.length != null) {
+        lang = lang[0]
     }
     lang = lang.toLowerCase().replace(';', '').replace('2.7', '').replace('3.6', '')
     lang = lang.split(' - ')[0]
