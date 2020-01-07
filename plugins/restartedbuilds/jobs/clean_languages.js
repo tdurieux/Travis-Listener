@@ -82,7 +82,7 @@ function getLang(lang) {
 }
 
 module.exports = function (agenda, restartedDB, buildsaverDB) {
-    const collection = buildsaverDB.collection('builds')
+    const collection = buildsaverDB.collection('jobs')
     const repoCollection = buildsaverDB.collection('repositories')
     const stat = {}
     agenda.define('clean languages', { concurrency: 1 }, async job => {
