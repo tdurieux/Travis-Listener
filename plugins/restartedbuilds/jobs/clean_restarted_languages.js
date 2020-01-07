@@ -103,7 +103,9 @@ module.exports = function (agenda, restartedDB, buildsaverDB) {
                     stat[repo_lang] = (stat[repo_lang] || 0) + 1
                     j.old.language = l;
                     j.new.language = l;
-                    j.repoLanguage = repo_lang;
+                    if (j.repoLanguage) {
+                        delete j.repoLanguage;
+                    }
                     j.old.repoLanguage = repo_lang;
                     j.new.repoLanguage = repo_lang;
                     await collection.updateOne({ _id: j._id }, { $set: j }, { upsert: true })
