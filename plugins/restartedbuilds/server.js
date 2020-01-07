@@ -79,6 +79,10 @@ server.listen(port, function () {
         const TASK_NAME = 'clean languages'
         startTask(TASK_NAME, res)
     });
+    app.get("/api/restarted/languages", async function (req, res) {
+        const TASK_NAME = 'clean restarted languages'
+        startTask(TASK_NAME, res)
+    });
     app.get("/api/logs/analyze", async function (req, res) {
         const TASK_NAME = 'analyze all jobs'
         startTask(TASK_NAME, res)
