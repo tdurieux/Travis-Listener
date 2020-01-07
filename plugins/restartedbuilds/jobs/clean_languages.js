@@ -52,10 +52,10 @@ function getLang(lang) {
         lang = lang.replace('{:', '').split('=>')[0]
     }
     lang = lang.toLowerCase()
-                .replace(';', '')
-                .replace('2.7', '')
-                .replace('3.6', '')
-                .replace('3.7.4', '')
+        .replace(';', '')
+        .replace('2.7', '')
+        .replace('3.6', '')
+        .replace('3.7.4', '')
     lang = lang.split(' - ')[0]
     lang = lang.split(' ')[0]
     if (supported_langs[lang]) {
@@ -81,19 +81,29 @@ function getLang(lang) {
     return lang;
 }
 
-module.exports = function(agenda, restartedDB, buildsaverDB) {
-    const jobsCollection = buildsaverDB.collection('builds')
+module.exports = function (agenda, restartedDB, buildsaverDB) {
+    const collection = buildsaverDB.collection('builds')
+    const repoCollection = buildsaverDB.collection('builds')
     const stat = {}
-    agenda.define('clean languages', {concurrency: 1}, async job => {
-        await jobsCollection.find({}).forEach(async j => {
+    agenda.define('clean languages', { concurrency: 1 }, async job => {
+        await collection.find({}).forEach(async j => {
             try {
                 const l = getLang(j.language)
+                let repo_lang = j.repoLanguage
+                if (repo_lang == null) {
+                    const repo = (await repoCollection.findOne({ id: j.repository_id }))
+                    if (repo != null) {
+                        repo_lang = repo.language
+                    }
+                }
+
                 if (l == null) {
                     console.log(j.language)
                 } else {
                     stat[l] = (stat[l] || 0) + 1
                     j.language = l;
-                    await jobsCollection.updateOne({_id: j._id}, {$set: j}, {upsert: true})
+                    j.repoLanguage = repo_lang;
+                    await collection.updateOne({ _id: j._id }, { $set: j }, { upsert: true })
                 }
             } catch (error) {
                 console.log(error)
