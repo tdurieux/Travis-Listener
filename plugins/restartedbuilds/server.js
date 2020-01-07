@@ -49,6 +49,7 @@ server.listen(port, function () {
     require('./jobs/analyzeAllLogs')(agenda, db, buildsaver_db);
     require('./jobs/reduceLogSize')(agenda, db, buildsaver_db);
     require('./jobs/clean_languages')(agenda, db, buildsaver_db);
+    require('./jobs/clean_restarted_languages')(agenda, db, buildsaver_db);
     require('./jobs/stat')(agenda, db, buildsaver_db);
     require('./jobs/restarted_stat')(agenda, db, buildsaver_db);
     agenda.start();
