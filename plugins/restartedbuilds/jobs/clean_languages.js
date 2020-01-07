@@ -91,7 +91,7 @@ module.exports = function (agenda, restartedDB, buildsaverDB) {
                 const l = getLang(j.language)
                 let repo_lang = j.repoLanguage
                 if (repo_lang == null) {
-                    const repo = (await repoCollection.findOne({ id: j.repository_id }))
+                    const repo = (await repoCollection.findOne({ travis_id: j.repository_id }))
                     if (repo != null) {
                         repo_lang = repo.language
                     }
@@ -100,7 +100,7 @@ module.exports = function (agenda, restartedDB, buildsaverDB) {
                 if (l == null) {
                     console.log(j.language)
                 } else {
-                    stat[l] = (stat[l] || 0) + 1
+                    stat[repo_lang] = (stat[repo_lang] || 0) + 1
                     j.language = l;
                     j.repoLanguage = repo_lang;
                     await collection.updateOne({ _id: j._id }, { $set: j }, { upsert: true })
@@ -108,6 +108,7 @@ module.exports = function (agenda, restartedDB, buildsaverDB) {
             } catch (error) {
                 console.log(error)
             }
+            await job.touch();
         })
         console.log(stat)
     })
