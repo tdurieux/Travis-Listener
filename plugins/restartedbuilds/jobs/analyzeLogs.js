@@ -7,7 +7,8 @@ module.exports = function(agenda, restartedDB, buildsaverDB) {
 
 
     agenda.define('analyze jobs', {concurrency: 1}, async job => {
-        const cursor = logCollection.find({$or: [{'analysis.original.reasons': {$exists: false}}, {'analysis.original.reasons': {$size: 0}}]}).sort({_id: -1});
+        // const cursor = logCollection.find({$or: [{'analysis.original.reasons': {$exists: false}}, {'analysis.original.reasons': {$size: 0}}]}).sort({_id: -1});
+        const cursor = logCollection.find();
 
         const nbLogs = await cursor.count()
         let count = 0
