@@ -19,6 +19,7 @@ class PhpParser extends Parser {
         let test;
         if (test = timeRegex.exec(line)) {
             this.currentTest = {
+                group: 'Test',
                 name: "",
                 body: "",
                 nbTest: 0,
@@ -29,6 +30,7 @@ class PhpParser extends Parser {
             };
         } else if (test = time2Regex.exec(line)) {
             this.currentTest = {
+                group: 'Test',
                 name: "",
                 body: "",
                 nbTest: 0,
@@ -40,6 +42,7 @@ class PhpParser extends Parser {
         } else if (test = testResults.exec(line)) {
             if (this.currentTest == null) {
                 this.currentTest = {
+                    group: 'Test',
                     name: "",
                     body: "",
                     nbTest: parseInt(test[1]),
@@ -71,12 +74,14 @@ class PhpParser extends Parser {
         } else if (test = missingPackage.exec(line)) {
             this.errors.push({
                 category: 'library',
+                group: 'Installation',
                 type: 'Unable to install dependencies',
                 library: test.groups.library
             });
         } else if (test = missingPackage2.exec(line)) {
             this.errors.push({
                 category: 'library',
+                group: 'Installation',
                 type: 'Unable to install dependencies',
                 library: test.groups.library
             });

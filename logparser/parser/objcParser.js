@@ -15,6 +15,7 @@ class ObjcParser extends Parser {
         let result;
         if (result = test.exec(line)) {
             this.tests.push({
+                group: 'Test',
                 name: result[4],
                 body: "",
                 nbTest: 1,
@@ -25,6 +26,7 @@ class ObjcParser extends Parser {
             });
         } else if (result = test1.exec(line)) {
             this.tests.push({
+                group: 'Test',
                 name: result.groups.test,
                 body: result.groups.message,
                 nbTest: 1,
@@ -34,6 +36,7 @@ class ObjcParser extends Parser {
             });
         } else if (result = testSummary.exec(line)) {
             this.tests.push({
+                group: 'Test',
                 name: result.groups.test,
                 body: result.groups.message,
                 nbTest: result.groups.executed,

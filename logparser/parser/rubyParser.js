@@ -16,6 +16,7 @@ class RubyParser extends Parser {
         let result = null;
         if ((result = test.exec(line))) {
             this.tests.push({
+                group: 'Test',
                 name: "",
                 body: "",
                 nbTest: result[1].length,
@@ -26,6 +27,7 @@ class RubyParser extends Parser {
             });
         } else if ((result = test2.exec(line))) {
             this.tests.push({
+                group: 'Test',
                 name: "",
                 body: "",
                 nbTest: parseInt(result.groups.nbTest),
@@ -36,12 +38,14 @@ class RubyParser extends Parser {
             });
         } else if ((result = moduleNotFound.exec(line))) {
             this.errors.push({
+                group: 'Installation',
                 category: 'library',
                 type: 'Module not found',
                 library: result.groups.library
             })
         } else if ((result = notGem.exec(line))) {
             this.errors.push({
+                group: 'Installation',
                 category: 'dependency_manager',
                 type: 'No Gemfile found'
             })

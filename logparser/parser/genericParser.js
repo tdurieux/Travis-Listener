@@ -20,17 +20,20 @@ class GenericParser extends Parser {
         if ((result = compilationError.exec(line))) {
             this.errors.push({
                 type: 'Compilation error',
+                group: 'Compilation',
                 message: result.groups.message,
                 parameter: result.groups.parameter,
             })
         } else if ((result = interactiveLogin.exec(line))) {
             this.errors.push({
                 category: 'bash',
+                group: 'Execution',
                 type: 'No interactive operation allowed'
             })
         } else if ((result = cmakeVersionProblem.exec(line))) {
             this.errors.push({
                 category: 'compilation',
+                group: 'Compilation',
                 type: 'Invalid cmake version',
                 actual: result.groups.actual,
                 expected: result.groups.expected
@@ -38,6 +41,7 @@ class GenericParser extends Parser {
         } else if ((result = genericError.exec(line))) {
             this.errors.push({
                 type: 'generic',
+                group: 'Execution',
                 message: result.groups.message,
                 line: result.groups.line,
                 column: result.groups.column,
