@@ -1,6 +1,3 @@
-const request = require('request')
-const async = require('async');
-
 module.exports = function(agenda, db, buildsaverDB) {
     const logCollection = db.collection('logs')
     const reasonsCollection = db.collection('reasons')
@@ -8,23 +5,30 @@ module.exports = function(agenda, db, buildsaverDB) {
 
     async function process(input) {
         const result = new Set()
+        const reason_types = new Set()
         if (input.analysis.original.reasons.length == 0) {
             return
         }
         for (let reason of input.analysis.original.reasons) {
-            result.add(reason.type);
+            if (reason.group){
+                result.add(reason.group);
+            }
+            if (reason.type){
+                reason_types.add(reason.type);
+            }
         }
         
         const job = await jobCollection.findOne({id: input.id}, {projection: {'new.state': 1, 'old.state': 1, 'old.language': 1}})
         const data = {
             id: input.id, 
             reasons: Array.from(result), 
+            reason_types: Array.from(reason_types), 
             'restarted_state': job.new.state, 
             'original_state': job.old.state, 
             'language': job.old.language
         };
         try {
-            await reasonsCollection.insertOne(data)
+            await reasonsCollection.updateOne({id: data.id}, {$set: reasonsCollection}, {upsert: true})
         } catch (error) {
             console.error(error)   
         }
@@ -33,8 +37,8 @@ module.exports = function(agenda, db, buildsaverDB) {
     agenda.define('generate restarted reasons', {concurrency: 1}, async job => {
         let count = 0;
         console.log("start query")
-        const checked = new Set()
-        await reasonsCollection.find({}, {projection: {id: 1}}).forEach(r => checked.add(r.id));
+        // const checked = new Set()
+        // await reasonsCollection.find({}, {projection: {id: 1}}).forEach(r => checked.add(r.id));
         const cursor = logCollection.find({"analysis.original.reasons.0": {$exists: true}}, {projection: {id: 1, 'analysis.original.reasons.type': 1}});
         const nbLogs = await cursor.count()
         
@@ -44,9 +48,9 @@ module.exports = function(agenda, db, buildsaverDB) {
             await job.touch();
             count++;
             const reason = await cursor.next();
-            if (checked.has(reason.id)) {
-                continue;
-            }
+            // if (checked.has(reason.id)) {
+            //     continue;
+            // }
             console.log('[Reason] ' + reason.id);
             try {
                 await process(reason);

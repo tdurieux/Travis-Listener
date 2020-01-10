@@ -54,8 +54,8 @@ server.listen(port, function () {
     require('./jobs/restarted_stat')(agenda, db, buildsaver_db);
     agenda.start();
 
-    await agenda.every("one hour", 'fetch restarted builds')
-    await agenda.every("one hour", 'fetch restarted jobs')
+    // await agenda.every("one hour", 'fetch restarted builds')
+    // await agenda.every("one hour", 'fetch restarted jobs')
 
     console.log("Restarted Service initialized");
     
