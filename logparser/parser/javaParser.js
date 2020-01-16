@@ -4,82 +4,82 @@ const independents = [
     {
         element: new RegExp("\\[(?<name>[^\\]]+)\\]: (?<status>[A-Z]+) in (?<class>.*)"),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp("(?<nbTest>[0-9]+) tests completed, (?<failed>[0-9]+) failed, ((?<skipped>[0-9]+) skipped)?"),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp(new RegExp(" (?<name>[a-zA-Z0-9\\-_]+)\\(\\) (?<status>↷|■|✔)( (?<message>.*))?")),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp("Running test:( test)? (?<name>.+)\\((?<class>.+)\\)"),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp("(?<status>Failed) test (?<name>.+) \\[(?<class>.+)\\] with exception: "),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp("\\[javac\\] (?<file>[^:]+):(?<line>[0-9]+): error: (?<message>.*)"),
         type: 'Compilation',
-        group: 'Compilation'
+        failure_group: 'Compilation'
     },
     {
         element: new RegExp("Error: Could not find or load main class (?<file>.+)"),
         type: 'Execution',
-        group: 'Execution'
+        failure_group: 'Execution'
     },
     {
         element: new RegExp("\\[WARNING\\] Missing header in: (?<file>.+)"),
         type: 'License',
-        group: 'Chore'
+        failure_group: 'Chore'
     },
     {
         element: new RegExp("\\[ERROR\\] (?<file>[^:]+):\\[(?<line>[0-9]+)(,(?<column>[0-9]+))?\\] (?<message>\\((.+)\\) (.+))\."),
         type: 'Checkstyle',
-        group: 'Chore'
+        failure_group: 'Chore'
     },
     {
         element: new RegExp("\\[checkstyle\\]( \\[ERROR\\])? (?<file>[^:]+):(?<line>[0-9]+):((?<column>[0-9]+):)? (?<message>.+)"),
         type: 'Checkstyle',
-        group: 'Chore'
+        failure_group: 'Chore'
     },
     {
         element: new RegExp("Could not find (?<group>[^: ]+):(?<artifact>[^: ]+)(:(pom|jar))?:(?<version>[^ ]+)\."),
         type: 'Missing library',
-        group: 'Installation'
+        failure_group: 'Installation'
     },
     {
         element: new RegExp("Could not transfer artifact (?<group>[^: ]+):(?<artifact>[^: ]+)(:(pom|jar))?:(?<version>[^ ]+)"),
         type: 'Missing library',
-        group: 'Installation'
+        failure_group: 'Installation'
     },
     {
         element: new RegExp("Failure to find (?<group>[^: ]+):(?<artifact>[^: ]+)(:(pom|jar))?:(?<version>[^ ]+)"),
         type: 'Missing library',
-        group: 'Installation'
+        failure_group: 'Installation'
     },
     {
         element: new RegExp("PMD Failure: (?<file>[^:]+):(?<line>[0-9]+) Rule:(?<rule>.+) Priority:(?<priority>[0-9]+) (?<message>.+)"),
         type: 'Checkstyle',
-        group: 'Chore'
+        failure_group: 'Chore'
     },
     {
         element: new RegExp("(?<nbTest>[0-9]+) tests? completed, (?<failure>[0-9]+) failed"),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     },
     {
         element: new RegExp("Tests run: (?<nbTest>[0-9]+), Failures: (?<failure>[0-9]+), Errors: (?<error>[0-9]+), Skipped: (?<skipped>[0-9]+)(, Time elapsed: (?<time>[0-9\.]+) ?s)?"),
         type: 'test',
-        group: 'Test'
+        failure_group: 'Test'
     }
 ]
 
@@ -88,7 +88,7 @@ const groups = [
     {
         name: 'audit',
         type: 'Checkstyle',
-        group: 'Chore',
+        failure_group: 'Chore',
         start: new RegExp("\\[INFO\\] Starting audit\.+"),
         end: new RegExp("Audit done\.+"),
         element: new RegExp("(?<file>[^:]+):(?<line>[0-9]+):((?<column>[0-9]+):)? (?<message>.+)")
@@ -96,7 +96,7 @@ const groups = [
     {
         name: 'checkstyle',
         type: 'Checkstyle',
-        group: 'Chore',
+        failure_group: 'Chore',
         start: new RegExp("\\[INFO\\] There (is|are) (.+) errors? reported by Checkstyle .+ with (.+) ruleset\."),
         end: new RegExp("\\[INFO\\] -+"),
         element: new RegExp("\\[ERROR\\] (?<file>[^:]+):\\[(?<line>[0-9]+)(,(?<column>[0-9]+))?\\] (?<message>.+)\.")
@@ -104,7 +104,7 @@ const groups = [
     {
         name: 'compile',
         type: 'Compilation',
-        group: 'Compilation',
+        failure_group: 'Compilation',
         start: new RegExp("\\[ERROR\\] COMPILATION ERROR"),
         end: new RegExp("location\\: +(.+)"),
         element: new RegExp("\\[ERROR\\] (?<file>[^:]+):\\[(?<line>[0-9]+)(,(?<column>[0-9]+))?\\] (?<message>.+)")
@@ -112,7 +112,7 @@ const groups = [
     {
         name: 'compile',
         type: 'Compilation',
-        group: 'Compilation',
+        failure_group: 'Compilation',
         start: new RegExp("\\[ERROR\\] COMPILATION ERROR"),
         end: new RegExp("location\\: +(.+)"),
         element: new RegExp("(?<file>[^:]+):\\[(?<line>[0-9]+)(,(?<column>[0-9]+))?\\] error: (?<message>.+)")
@@ -120,7 +120,7 @@ const groups = [
     {
         name: 'compile',
         type: 'Compilation',
-        group: 'Compilation',
+        failure_group: 'Compilation',
         start: new RegExp("\\[ERROR\\] COMPILATION ERROR"),
         end: new RegExp("location\\: +(.+)"),
         element: new RegExp("(?<file>.+):(?<line>[0-9]+): error: (?<message>.+)")
@@ -128,7 +128,7 @@ const groups = [
     {
         name: 'test',
         type: 'test',
-        group: 'Test',
+        failure_group: 'Test',
         start: new RegExp("Running (?<name>.*Tests?.*)$"),
         end: new RegExp("Tests run: (?<nbTest>[0-9]+), Failures: (?<failure>[0-9]+), Errors: (?<error>[0-9]+), Skipped: (?<skipped>[0-9]+)(, Time elapsed: (?<time>[0-9\.]+) ?s)?"),
         element: new RegExp("(?<all_line>.+)")
@@ -136,7 +136,7 @@ const groups = [
     {
         name: 'graddle',
         type: 'test',
-        group: 'Test',
+        failure_group: 'Test',
         start: new RegExp("([0-9]+)\\) (?<name>.+) \\((?<class>.+)\\)"),
         end: new RegExp("Tests run: (?<nbTest>[0-9]+),  Failures: (?<failure>[0-9]+)"),
         element: new RegExp("(?<all_line>.+)")
@@ -144,7 +144,7 @@ const groups = [
     {
         name: 'graddle2',
         type: 'test',
-        group: 'Test',
+        failure_group: 'Test',
         start: new RegExp("Executing test (?<name>.+) \\[(?<class>.+)\\]"),
         end: new RegExp("(((?<nbTest>[0-9]+) tests completed, (?<failure>[0-9]+) failed)|(Executing test (?<name>.+) \\[(?<class>.+)\\]))"),
         startIsEnd: true,
@@ -153,7 +153,7 @@ const groups = [
     {
         name: 'compare',
         type: 'Compare version',
-        group: 'Chore',
+        failure_group: 'Chore',
         start: new RegExp("\\[INFO\\] Comparing to version: "),
         end: new RegExp("\\[INFO\\] -+"),
         element: new RegExp("\\[ERROR\\] (?<id>[0-9]+): (?<file>.+): ")

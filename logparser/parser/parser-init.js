@@ -62,101 +62,103 @@ async function parseLog(log) {
                         exitCode = parseInt(line.substring("Done. Your build exited with ".length, line.length -1));
                     } else if (line.indexOf("fatal: Could not read from remote repository.") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             type: 'Unable to clone'
                         })
                     } else if (result = line.match(/fatal: unable to access '(?<file>[^']+)'/)) {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'credential',
                             type: 'Unable to clone',
                             library: result.groups.file
                         })
                     } else if (result = line.match(/fatal: Authentication failed for '(?<file>[^']+)'/)) {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'credential',
                             type: 'Unable to clone',
                             library: result.groups.file
                         })
                     } else if (line.indexOf("Error: retrieving gpg key timed out.") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'timeout',
                             type: '[gpg] Unable to install dependencies'
                         })
                     } else if (line.indexOf("Hash Sum mismatch") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Incorrect hash sum'
                         })
                     // Could not connect to apt.cache.travis-ci.com:80 (), connection timed out
                     } else if (line.indexOf("Could not connect to ") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Unable to install dependencies'
                         })
                     // error: component download failed for 
                     } else if (line.indexOf("error: component download failed for ") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Unable to install dependencies'
                         })
                     }else if (line.indexOf("Unable to connect to ") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Unable to install dependencies'
                         })
                     } else if (line.indexOf("Connection timed out") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'timeout',
                             type: 'Connection timed out'
                         })
                     } else if (line.indexOf("The TLS connection was non-properly terminated.") != -1)  {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Connection terminated'
                         })
                     } else if (line.indexOf("The job exceeded the maximum time limit for jobs, and has been terminated.") != -1)  {
                         errors.push({
+                            failure_group: 'Travis',
                             category: 'travis',
                             type: 'Execution timeout'
                         })
                     } else if (line.indexOf("No output has been received in the last 10m") != -1)  {
                         errors.push({
+                            failure_group: 'Travis',
                             category: 'travis',
                             type: 'Log timeout'
                         })
                     } else if(result = line.match(/Failed to download (file|index): (?<file>[^ ]+)/)) {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'connection',
                             type: 'Unable to install dependencies',
                             library: result.groups.file
                         })
                     } else if(result = line.match(/Unable to locate package (?<file>[^ ]+)/)) {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'library',
                             type: 'Unable to install dependencies',
                             library: result.groups.file
                         })
                     } else if (result = line.match(/error: failed to push some refs to '(?<file>[^']+)'/)) {
                         errors.push({
-                            group: 'Installation',
+                            failure_group: 'Installation',
                             category: 'credential',
                             type: 'Unable to push',
                             library: result.groups.file
                         })
                     } else if (line.toLowerCase().indexOf('address already in use') > -1) {
                         errors.push({
-                            group: 'Execution',
+                            failure_group: 'Execution',
                             reason: 'Project',
                             category: 'server',
                             type: 'port already in use'
@@ -190,6 +192,7 @@ async function parseLog(log) {
             for (let test of tests) {
                 if (test.nbFailure > 0) {
                     reasons.push({
+                        failure_group: 'Test',
                         category: "test",
                         test: test.name,
                         type: 'Test failure'
@@ -197,6 +200,7 @@ async function parseLog(log) {
                 } 
                 if (test.nbError > 0) {
                     reasons.push({
+                        failure_group: 'Test',
                         category: "test",
                         test: test.name,
                         type: 'Test error'

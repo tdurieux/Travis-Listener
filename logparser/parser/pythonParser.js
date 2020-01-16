@@ -35,7 +35,7 @@ class PyParser extends Parser {
         let result = test.exec(line);
         if (result) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1] + "::" + result[2],
                 body: "",
                 nbTest: 1,
@@ -49,7 +49,7 @@ class PyParser extends Parser {
             this.totalTime = parseFloat(result[4]);
         } else if ((result = summaryTest3.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: 0,
@@ -60,7 +60,7 @@ class PyParser extends Parser {
             });
         } else if ((result = summaryTest4.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: result[4],
@@ -71,7 +71,7 @@ class PyParser extends Parser {
             });
         } else if ((result = summaryTest5.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: result[2] + result[1],
@@ -82,7 +82,7 @@ class PyParser extends Parser {
             });
         } else if ((result = summaryTest6.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: parseInt(result.groups.passed) + parseInt(result.groups.failed),
@@ -99,7 +99,7 @@ class PyParser extends Parser {
         } else if (this.inPyflakes === true && (result = pyflakesStyleError.exec(line))) {
             this.inPyflakes = true
             this.errors.push({
-                group: 'Chore',
+                failure_group: 'Chore',
                 file: result[1],
                 line: result[2],
                 message: result[3],
@@ -107,19 +107,19 @@ class PyParser extends Parser {
             })
         } else if ((result = compilationError.exec(line))) {
             this.errors.push({
-                group: 'Compilation',
+                failure_group: 'Compilation',
                 type: 'Compilation error'
             })
         } else if ((result = moduleNotFound.exec(line))) {
             this.errors.push({
                 category: 'library',
-                group: 'Installation',
+                failure_group: 'Installation',
                 type: 'Module not found',
                 library: result.groups.library
             })
         } else if ((result = test2.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[2],
                 body: "",
                 nbTest: parseInt(result[3]),
@@ -130,7 +130,7 @@ class PyParser extends Parser {
             });
         } else if (line.indexOf("Download") == -1 && (result = test3.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: result[2].length,
@@ -141,7 +141,7 @@ class PyParser extends Parser {
             });
         } else if ((result = test4.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -152,7 +152,7 @@ class PyParser extends Parser {
             });
         } else if ((result = test5.exec(line))) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[2],
                 body: "",
                 nbTest: 1,
@@ -167,7 +167,7 @@ class PyParser extends Parser {
                 name = result[4] + "::" + result[2]
             }
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: name,
                 body: "",
                 nbTest: 1,
@@ -179,7 +179,7 @@ class PyParser extends Parser {
         } else if ((result = testError2.exec(line))) {
             let name = result[1] + "::" + result[2]
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: name,
                 body: result[3],
                 nbTest: 1,
@@ -190,7 +190,7 @@ class PyParser extends Parser {
             });
         } else if ((result = testStartWithBody.exec(line))) {
             this.currentTest = {
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1] + "::" + result[2],
                 body: "",
                 nbTest: 1,

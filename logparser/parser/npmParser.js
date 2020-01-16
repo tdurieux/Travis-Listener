@@ -33,7 +33,7 @@ class JsParser extends Parser {
         let result;
         if (result = testNoAssert.exec(line)) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -53,7 +53,7 @@ class JsParser extends Parser {
                 }
             }
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[2],
                 body: "",
                 nbTest: 1,
@@ -64,7 +64,7 @@ class JsParser extends Parser {
             });
         } else if (result = test2.exec(line)) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[3],
                 body: "",
                 nbTest: 1,
@@ -75,7 +75,7 @@ class JsParser extends Parser {
             });
         } else if (result = test3.exec(line)) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: '',
                 body: "",
                 nbTest: 1,
@@ -86,7 +86,7 @@ class JsParser extends Parser {
             });
         } else if (result = test4.exec(line)) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result.groups.test,
                 body: "",
                 nbTest: 1,
@@ -97,7 +97,7 @@ class JsParser extends Parser {
         } else if (result = test5.exec(line)) {
             this.tool = 'jasmine2'
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result.groups.test,
                 body: "",
                 nbTest: 1,
@@ -107,7 +107,7 @@ class JsParser extends Parser {
             });
         } else if (result = testSummary1.exec(line)) {
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: result.groups.total,
@@ -117,7 +117,7 @@ class JsParser extends Parser {
             });
         } else if (result = error.exec(line)) {
             this.errors.push({
-                group: 'Execution',
+                failure_group: 'Execution',
                 file: result[1],
                 line: parseInt(result[2]),
                 message: result[5]
@@ -128,7 +128,7 @@ class JsParser extends Parser {
         } else if (result = unavailablePackage.exec(line)) {
             this.errors.push({
                 category: 'library',
-                group: 'Installation',
+                failure_group: 'Installation',
                 type: 'Unable to install dependencies',
                 requiredBy: result.groups.required,
                 library: result.groups.library,
@@ -136,7 +136,7 @@ class JsParser extends Parser {
         } else if (result = unavailableVersion.exec(line)) {
             this.errors.push({
                 category: 'library',
-                group: 'Installation',
+                failure_group: 'Installation',
                 type: 'Unable to install dependencies',
                 library: result.groups.library,
                 version: result.groups.version,

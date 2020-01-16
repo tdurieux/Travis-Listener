@@ -21,7 +21,7 @@ class RubyParser extends Parser {
         if ((result = test1.exec(line))) {
             this.tool = "gotest"
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -33,7 +33,7 @@ class RubyParser extends Parser {
         } else if ((result = test2.exec(line))) {
             this.tool = "gotest"
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -45,7 +45,7 @@ class RubyParser extends Parser {
         } else if ((result = test3.exec(line))) {
             this.tool = "gotest"
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -57,7 +57,7 @@ class RubyParser extends Parser {
         } else if ((result = test4.exec(line))) {
             this.tool = "gotest"
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: "",
                 body: "",
                 nbTest: 1,
@@ -69,7 +69,7 @@ class RubyParser extends Parser {
         } else if ((result = test5.exec(line))) {
             this.tool = "gotest"
             this.tests.push({
-                group: 'Test',
+                failure_group: 'Test',
                 name: result[1],
                 body: "",
                 nbTest: 1,
@@ -81,7 +81,7 @@ class RubyParser extends Parser {
         } else if ((result = dep1.exec(line))) {
             this.errors.push({
                 category: 'dependency',
-                group: 'Installation',
+                failure_group: 'Installation',
                 type: 'Dependency not found',
                 message: result[0]
             })
