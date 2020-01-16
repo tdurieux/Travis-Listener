@@ -10,8 +10,10 @@ module.exports = function(agenda, db, buildsaverDB) {
             return
         }
         for (let reason of input.analysis.original.reasons) {
-            if (reason.group){
-                result.add(reason.group);
+            if (reason.failure_group){
+                result.add(reason.failure_group);
+            } else if (reason.failure_failure_group){
+                result.add(reason.failure_failure_group);
             }
             if (reason.type){
                 reason_types.add(reason.type);
@@ -28,7 +30,7 @@ module.exports = function(agenda, db, buildsaverDB) {
             'language': job.old.language
         };
         try {
-            await reasonsCollection.updateOne({id: data.id}, {$set: reasonsCollection}, {upsert: true})
+            await reasonsCollection.updateOne({id: data.id}, {$set: data}, {upsert: true})
         } catch (error) {
             console.error(error)   
         }
@@ -36,13 +38,10 @@ module.exports = function(agenda, db, buildsaverDB) {
 
     agenda.define('generate restarted reasons', {concurrency: 1}, async job => {
         let count = 0;
-        console.log("start query")
         // const checked = new Set()
         // await reasonsCollection.find({}, {projection: {id: 1}}).forEach(r => checked.add(r.id));
-        const cursor = logCollection.find({"analysis.original.reasons.0": {$exists: true}}, {projection: {id: 1, 'analysis.original.reasons.type': 1}});
+        const cursor = logCollection.find({"analysis.original.reasons.0": {$exists: true}}, {projection: {id: 1, 'analysis.original.reasons.type': 1, 'analysis.original.reasons.failure_group': 1, 'analysis.original.reasons.failure_failure_group': 1}});
         const nbLogs = await cursor.count()
-        
-        console.log("start process")
         
         while (await cursor.hasNext()) {
             await job.touch();
@@ -60,8 +59,6 @@ module.exports = function(agenda, db, buildsaverDB) {
 
             job.attrs.progression = {index: count, total: nbLogs}
             await job.save();
-            
-            checked.add(reason.id)
         }
     });
 };
