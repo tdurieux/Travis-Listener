@@ -30,14 +30,14 @@ app.use(function(req, res, next) {
 app.post('/api/clean', (req, res) => {
   const log = cleanLog(req.body.log);
   if (log == null) {
-    res.status(500).end();
+    return res.status(500).end();
   }
   return res.send(log).end()
 })
 app.post('/api/analyze', async (req, res) => {
   const log = cleanLog(req.body.log);
   if (log == null) {
-    res.status(500).end();
+    return res.status(500).end();
   }
   return res.send(await logParser(log))
 });
