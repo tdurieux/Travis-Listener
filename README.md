@@ -4,6 +4,28 @@ Travis Listener is an architecture that crawls TravisCI to collect Builds and Jo
 It currently contains two plugins. One save all the builds and jobs inside a MangoDB database.
 The second plugin detect the restarted builds and save them.
 
+Travis Listener has been build for the paper "Empirical study of restarted and flaky builds on Travis CI".
+You can cite this paper using the following bibtex:
+
+```bib
+@inproceedings{DurieuxTravis20,
+	title        = {Empirical Study of Restarted and Flaky Builds on Travis CI},
+	author       = {Durieux, Thomas and Le Goues, Claire and Hilton, Michael and Abreu, Rui},
+	year         = 2020,
+	booktitle    = {Proceedings of the 17th International Conference on Mining Software Repositories},
+	location     = {Seoul, Republic of Korea},
+	publisher    = {Association for Computing Machinery},
+	address      = {New York, NY, USA},
+	series       = {MSR '20},
+	pages        = {254–264},
+	doi          = {10.1145/3379597.3387460},
+	isbn         = 9781450375177,
+	url          = {https://doi.org/10.1145/3379597.3387460},
+	numpages     = 11
+}
+```
+
+The scripts for the paper "An Analysis of 35+ Million Jobs of Travis CI" is available in this repository https://github.com/tdurieux/travis-collector.
 ## Usage
 
 1. Install Docker and Dockercompose
