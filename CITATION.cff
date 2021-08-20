@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Durieux"
+  given-names: "Thomas"
+  orcid: "https://orcid.org/0000-0002-1996-6134"
+- family-names: "Le Goues"
+  given-names: "Claire"
+  orcid: "https://orcid.org/0000-0002-3931-060X"
+- family-names: "Hilton"
+  given-names: "Michael"
+  orcid: "https://orcid.org/0000-0001-9195-6902"
+- family-names: "Abreu"
+  given-names: "Rui"
+  orcid: "https://orcid.org/0000-0003-3734-3157"
+title: "My Research Software"
+version: 1.0.0
+doi: 10.5281/zenodo.3709181
+date-released: 2020-03-13
+url: "https://github.com/tdurieux/Travis-Listener/new/master"
+preferred-citation:
+  type: inproceedings
+  authors:
+    - family-names: "Durieux"
+      given-names: "Thomas"
+      orcid: "https://orcid.org/0000-0002-1996-6134"
+    - family-names: "Le Goues"
+      given-names: "Claire"
+      orcid: "https://orcid.org/0000-0002-3931-060X"
+    - family-names: "Hilton"
+      given-names: "Michael"
+      orcid: "https://orcid.org/0000-0001-9195-6902"
+    - family-names: "Abreu"
+      given-names: "Rui"
+      orcid: "https://orcid.org/0000-0003-3734-3157"
+  doi: "10.1145/3379597.3387460"
+  booktile: "Proceedings of the 17th International Conference on Mining Software Repositories"
+  month: 9
+  start: 254
+  end: 264
+  title: "Empirical Study of Restarted and Flaky Builds on Travis CI"
+  year: 2020
